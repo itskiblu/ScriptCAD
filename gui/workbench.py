@@ -71,7 +71,14 @@ class ScriptCAD_ClearDocCommand:
         clear_document()
 
 
-class ScriptCADWorkbench:
+# Base Workbench class (FreeCAD GUI provides Workbench / Gui.Workbench)
+try:
+    _BaseWB = Workbench  # type: ignore[name-defined]
+except NameError:
+    _BaseWB = getattr(Gui, "Workbench", object)
+
+
+class ScriptCADWorkbench(_BaseWB):
     """The ScriptCAD Workbench for FreeCAD."""
 
     MenuText = "ScriptCAD"
