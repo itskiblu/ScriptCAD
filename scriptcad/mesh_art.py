@@ -32,8 +32,8 @@ class MeshArt:
     and bridge to FreeCAD B-Rep solids.
     """
 
-    def __init__(self, vertices: Optional[List[Tuple[float, float, float]]] = None,
-                 faces: Optional[List[List[int]]] = None):
+    def __init__(self, vertices: Optional[Union[List[Tuple[float, float, float]], List[List[float]]]] = None,
+                 faces: Optional[Union[List[List[int]], List[Tuple[int, ...]]]] = None):
         self.vertices = [list(v) for v in (vertices or [])]
         self.faces = [list(f) for f in (faces or [])]
 
@@ -182,6 +182,8 @@ class MeshArt:
             return ShapeWrapper()
 
         fc_mesh = self.to_freecad_mesh()
+        if fc_mesh is None:
+            return ShapeWrapper()
         shape = Part.Shape()
         shape.makeShapeFromMesh(fc_mesh.Topology, tolerance)
 

@@ -4,7 +4,7 @@ transform chaining, and operator-overloaded CSG booleans for FreeCAD.
 """
 
 import math
-from typing import Union, Tuple, List, Optional
+from typing import Union, Tuple, List, Optional, Any
 
 try:
     import FreeCAD as App
@@ -20,7 +20,7 @@ _DEFAULT_AS_BODY = True
 def set_partdesign_mode(enabled: bool = True):
     """Enable or disable automatic wrapping of solids into PartDesign Bodies."""
     global _DEFAULT_AS_BODY
-    _DEFAULT_AS_BODY = bool(enabled)
+    _DEFAULT_AS_BODY = enabled
 
 
 def convert_to_body(obj_or_name=None, doc=None):
@@ -108,9 +108,9 @@ class ShapeWrapper:
     - Blender-style quick display: `shape.show("MyObject")`
     """
 
-    def __init__(self, shape=None):
+    def __init__(self, shape: Any = None):
         if isinstance(shape, ShapeWrapper):
-            self._shape = shape.shape.copy()
+            self._shape = shape.shape.copy() if shape.shape is not None else None
         elif shape is not None:
             self._shape = shape
         else:
@@ -145,26 +145,38 @@ class ShapeWrapper:
 
     # --- CSG Operator Overloading (Blender Art Style) ---
 
-    def __sub__(self, other: Union["ShapeWrapper", any]) -> "ShapeWrapper":
+    def __sub__(self, other: Union["ShapeWrapper", Any]) -> "ShapeWrapper":
         """Boolean Difference / Cut: `body - tool`"""
+        if self._shape is None:
+            return self
         other_shape = other.shape if isinstance(other, ShapeWrapper) else other
+        if other_shape is None:
+            return self
         return ShapeWrapper(self._shape.cut(other_shape))
 
-    def __add__(self, other: Union["ShapeWrapper", any]) -> "ShapeWrapper":
+    def __add__(self, other: Union["ShapeWrapper", Any]) -> "ShapeWrapper":
         """Boolean Union / Fuse: `body + tool`"""
+        if self._shape is None:
+            return self
         other_shape = other.shape if isinstance(other, ShapeWrapper) else other
+        if other_shape is None:
+            return self
         return ShapeWrapper(self._shape.fuse(other_shape))
 
-    def __and__(self, other: Union["ShapeWrapper", any]) -> "ShapeWrapper":
+    def __and__(self, other: Union["ShapeWrapper", Any]) -> "ShapeWrapper":
         """Boolean Intersection / Common: `body & tool`"""
+        if self._shape is None:
+            return self
         other_shape = other.shape if isinstance(other, ShapeWrapper) else other
+        if other_shape is None:
+            return self
         return ShapeWrapper(self._shape.common(other_shape))
 
     # --- Fluent Transforms & Placement ---
 
     def translate(self, x: float = 0.0, y: float = 0.0, z: float = 0.0) -> "ShapeWrapper":
         """Translate the shape along X, Y, Z axes."""
-        if Part is None or App is None:
+        if Part is None or App is None or self._shape is None:
             return self
         vec = App.Vector(x, y, z)
         copied = self._shape.copy()
@@ -179,7 +191,7 @@ class ShapeWrapper:
                angle: float = 0.0,
                center: Tuple[float, float, float] = (0, 0, 0)) -> "ShapeWrapper":
         """Rotate the shape around an arbitrary axis by degrees."""
-        if Part is None or App is None:
+        if Part is None or App is None or self._shape is None:
             return self
         base_pt = App.Vector(*center)
         rot_axis = App.Vector(*axis)
@@ -201,7 +213,7 @@ class ShapeWrapper:
 
     def scale(self, factor: float, center: Tuple[float, float, float] = (0, 0, 0)) -> "ShapeWrapper":
         """Uniformly scale the shape."""
-        if Part is None or App is None:
+        if Part is None or App is None or self._shape is None:
             return self
         copied = self._shape.copy()
         base_pt = App.Vector(*center)
@@ -212,6 +224,8 @@ class ShapeWrapper:
         """
         Mirror shape across 'XY', 'XZ', or 'YZ' plane.
         """
+        if Part is None or App is None or self._shape is None:
+            return self
         copied = self._shape.copy()
         norm_map = {
             "XY": (0, 0, 1),

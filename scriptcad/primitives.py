@@ -124,7 +124,7 @@ def Polygon(points: List[Tuple[float, float, float]], filled: bool = True) -> Sh
     Construct a planar polygon from a sequence of (x, y, z) points.
     Automatically closes the polygon.
     """
-    if Part is None or len(points) < 3:
+    if Part is None or App is None or len(points) < 3:
         return ShapeWrapper()
     vectors = [App.Vector(p[0], p[1], p[2] if len(p) > 2 else 0.0) for p in points]
     if vectors[0] != vectors[-1]:
@@ -148,6 +148,8 @@ def Loft(profiles: List[ShapeWrapper], solid: bool = True, ruled: bool = False) 
     wires = []
     for p in profiles:
         s = p.shape
+        if s is None:
+            continue
         if hasattr(s, "Wires") and s.Wires:
             wires.append(s.Wires[0])
         elif s.ShapeType == "Wire":
@@ -164,7 +166,7 @@ def Extrude(profile: ShapeWrapper,
     """
     Extrude a 2D wire or face along a direction vector.
     """
-    if Part is None:
+    if Part is None or App is None or profile.shape is None:
         return ShapeWrapper()
     dir_vec = App.Vector(*direction).normalize() * distance
     extruded = profile.shape.extrude(dir_vec)
@@ -178,7 +180,7 @@ def Revolve(profile: ShapeWrapper,
     """
     Revolve a 2D wire or face around an axis.
     """
-    if Part is None:
+    if Part is None or App is None or profile.shape is None:
         return ShapeWrapper()
     base_pt = App.Vector(*center)
     dir_vec = App.Vector(*axis)
