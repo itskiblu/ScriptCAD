@@ -6,7 +6,7 @@
   <date>2026-10-10</date>
   <maintainer email="user@example.com">ScriptCAD Team</maintainer>
   <license>LGPL-2.1-or-later</license>
-  <url type="repository" branch="main">https://github.com/example/ScriptCAD</url>
+  <url type="repository" branch="main">https://github.com/itskiblu/ScriptCAD</url>
   <icon>Resources/icons/ScriptCAD_Workbench.svg</icon>
   <content>
     <workbench>
