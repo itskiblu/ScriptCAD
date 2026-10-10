@@ -1,5 +1,5 @@
-# Pyrefly configuration for FreeCAD BlendCAD workbench
-# FreeCAD C++ modules are provided dynamically at runtime by FreeCAD.
+# Pyrefly configuration for FreeCAD ScriptCAD workbench
+# FreeCAD C++ and Qt modules are provided dynamically at runtime by FreeCAD.
 ignore-missing-imports = [
     "FreeCAD",
     "FreeCAD.*",
@@ -13,13 +13,19 @@ ignore-missing-imports = [
     "Draft.*",
     "Sketcher",
     "Sketcher.*",
+    "PySide6",
+    "PySide6.*",
+    "PySide2",
+    "PySide2.*",
 ]
 
 search-path = [
     ".",
+    "scriptcad",
     "blendcad",
     "gui",
     "C:/Program Files/FreeCAD 1.1/bin",
     "C:/Program Files/FreeCAD 1.1/lib",
     "C:/Program Files/FreeCAD 1.1/Mod",
+    "C:/Program Files/FreeCAD 1.1/bin/Lib/site-packages",
 ]

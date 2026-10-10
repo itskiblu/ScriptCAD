@@ -1,5 +1,5 @@
 """
-BlendCAD GUI Workbench Module:
+ScriptCAD GUI Workbench Module:
 Encapsulates workbench definition, commands, and dock manager as a clean Python module.
 """
 
@@ -9,36 +9,36 @@ import FreeCAD as App
 import FreeCADGui as Gui
 
 WORKBENCH_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ICON_PATH = os.path.join(WORKBENCH_DIR, "Resources", "icons", "BlendCAD_Workbench.svg").replace("\\", "/")
+ICON_PATH = os.path.join(WORKBENCH_DIR, "Resources", "icons", "ScriptCAD_Workbench.svg").replace("\\", "/")
 
 # Global dock widget instance
-_blendcad_dock = None
+_scriptcad_dock = None
 
 
 def get_or_create_dock():
-    """Retrieve or instantiate the BlendCAD scripting dock."""
-    global _blendcad_dock
-    from gui.editor_dock import BlendCADEditorDock
+    """Retrieve or instantiate the ScriptCAD scripting dock."""
+    global _scriptcad_dock
+    from gui.editor_dock import ScriptCADEditorDock
     from gui.qt_compat import Qt
 
     main_win = Gui.getMainWindow()
     if main_win is None:
         return None
 
-    if _blendcad_dock is None:
-        _blendcad_dock = BlendCADEditorDock(main_win)
-        main_win.addDockWidget(Qt.RightDockWidgetArea, _blendcad_dock)
-    return _blendcad_dock
+    if _scriptcad_dock is None:
+        _scriptcad_dock = ScriptCADEditorDock(main_win)
+        main_win.addDockWidget(Qt.RightDockWidgetArea, _scriptcad_dock)
+    return _scriptcad_dock
 
 
-class BlendCAD_ToggleEditorCommand:
-    """FreeCAD Command to show/hide the BlendCAD scripting panel."""
+class ScriptCAD_ToggleEditorCommand:
+    """FreeCAD Command to show/hide the ScriptCAD scripting panel."""
 
     def GetResources(self):
         return {
             'Pixmap': ICON_PATH,
-            'MenuText': 'BlendCAD Script Editor',
-            'ToolTip': 'Toggle the Blender-style interactive script editor dock'
+            'MenuText': 'ScriptCAD Script Editor',
+            'ToolTip': 'Toggle the interactive ScriptCAD script editor dock'
         }
 
     def IsActive(self):
@@ -54,7 +54,7 @@ class BlendCAD_ToggleEditorCommand:
                 dock.raise_()
 
 
-class BlendCAD_ClearDocCommand:
+class ScriptCAD_ClearDocCommand:
     """FreeCAD Command to clear active document."""
 
     def GetResources(self):
@@ -67,57 +67,69 @@ class BlendCAD_ClearDocCommand:
         return App.ActiveDocument is not None
 
     def Activated(self):
-        from blendcad import clear_document
+        from scriptcad import clear_document
         clear_document()
 
 
-# Base Workbench class (FreeCAD GUI provides Workbench / Gui.Workbench)
-try:
-    _BaseWB = Workbench
-except NameError:
-    _BaseWB = getattr(Gui, "Workbench", object)
+class ScriptCADWorkbench:
+    """The ScriptCAD Workbench for FreeCAD."""
 
-
-class BlendCADWorkbench(_BaseWB):
-    """The BlendCAD Workbench for FreeCAD."""
-
-    MenuText = "BlendCAD"
-    ToolTip = "Blender-style procedural CAD & 3D mesh art scripting"
+    MenuText = "ScriptCAD"
+    ToolTip = "Procedural solid modeling & mesh art scripting workbench"
     Icon = ICON_PATH
 
     def __init__(self):
         self.__class__.Icon = ICON_PATH
-        self.__class__.MenuText = "BlendCAD"
-        self.__class__.ToolTip = "Blender-style procedural CAD & 3D mesh art scripting"
+        self.__class__.MenuText = "ScriptCAD"
+        self.__class__.ToolTip = "Procedural solid modeling & mesh art scripting workbench"
+        self.command_list: list = []
+
+    def appendToolbar(self, name: str, cmds: list):
+        """FreeCAD GUI provides this at runtime; stub ensures headless safety."""
+        pass
+
+    def appendMenu(self, name: str, cmds: list):
+        """FreeCAD GUI provides this at runtime; stub ensures headless safety."""
+        pass
+
+    def appendContextMenu(self, name: str, cmds: list):
+        """FreeCAD GUI provides this at runtime; stub ensures headless safety."""
+        pass
 
     def Initialize(self):
-        """Construct toolbars and menus for BlendCAD."""
+        """Construct toolbars and menus for ScriptCAD."""
         try:
-            Gui.addCommand('BlendCAD_ToggleEditor', BlendCAD_ToggleEditorCommand())
-            Gui.addCommand('BlendCAD_ClearDoc', BlendCAD_ClearDocCommand())
+            Gui.addCommand('ScriptCAD_ToggleEditor', ScriptCAD_ToggleEditorCommand())
+            Gui.addCommand('ScriptCAD_ClearDoc', ScriptCAD_ClearDocCommand())
         except Exception:
             pass
 
-        self.command_list = ['BlendCAD_ToggleEditor', 'BlendCAD_ClearDoc']
-        self.appendToolbar("BlendCAD Tools", self.command_list)
-        self.appendMenu("BlendCAD", self.command_list)
+        self.command_list = ['ScriptCAD_ToggleEditor', 'ScriptCAD_ClearDoc']
+        self.appendToolbar("ScriptCAD Tools", self.command_list)
+        self.appendMenu("ScriptCAD", self.command_list)
 
     def Activated(self):
-        """Called automatically when switching to BlendCAD workbench."""
+        """Called automatically when switching to ScriptCAD workbench."""
         try:
             dock = get_or_create_dock()
             if dock is not None:
                 dock.show()
                 dock.raise_()
         except Exception as e:
-            App.Console.PrintError(f"[BlendCAD] Error opening dock on activation: {e}\n")
+            App.Console.PrintError(f"[ScriptCAD] Error opening dock on activation: {e}\n")
 
     def Deactivated(self):
         """Called when user switches away to another workbench."""
         pass
 
     def ContextMenu(self, recipient):
-        self.appendContextMenu("BlendCAD", self.command_list)
+        self.appendContextMenu("ScriptCAD", self.command_list)
 
     def GetClassName(self):
         return "Gui::PythonWorkbench"
+
+
+# Backward-compatibility aliases
+BlendCADWorkbench = ScriptCADWorkbench
+BlendCAD_ToggleEditorCommand = ScriptCAD_ToggleEditorCommand
+BlendCAD_ClearDocCommand = ScriptCAD_ClearDocCommand

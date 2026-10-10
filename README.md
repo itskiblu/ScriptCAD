@@ -1,13 +1,13 @@
-# BlendCAD: Blender-Style Procedural CAD & Mesh Art Workbench for FreeCAD
+# ScriptCAD: Procedural Solid Modeling & Mesh Art Scripting Workbench for FreeCAD
 
-**BlendCAD** brings the fluid, artistic, and procedural scripting workflow of **Blender** directly into **FreeCAD's** precision solid-modeling CAD environment.
+**ScriptCAD** brings a fluid, procedural scripting workflow and embedded code workspace directly into **FreeCAD's** precision solid-modeling CAD environment.
 
 ---
 
 ## Highlights
 
-- **Embedded Scripting Workspace**: A dockable code editor inside FreeCAD featuring Blender-inspired dark theme, line numbers, and Python syntax highlighting.
-- **Blender-Style Shortcuts**: Run your script anytime with **`Alt+P`** or **`Ctrl+Enter`**.
+- **Embedded Scripting Workspace**: A dockable code editor inside FreeCAD featuring dark theme, line numbers, and Python syntax highlighting.
+- **Fast Run Shortcuts**: Run your script anytime with **`Alt+P`** or **`Ctrl+Enter`**.
 - **⚡ Live Sync Mode**: Tweak dimensions or formulas in code and see your CAD model update automatically as you type.
 - **Fluent & Pythonic CAD Solids**: Avoid verbose OpenCASCADE boilerplate. Create solids, apply transforms, and chain booleans with ease.
 - **Operator-Overloaded CSG**:
@@ -22,16 +22,16 @@
 
 ## Installation & Setup
 
-BlendCAD is located at:
+ScriptCAD is located at:
 `C:\Users\brian\.gemini\antigravity-ide\scratch\BlendCAD`
 
-It is already linked directly to your FreeCAD 1.1 installation:
-`%APPDATA%\FreeCAD\v1-1\Mod\BlendCAD`
+It is linked directly to your FreeCAD 1.1 installation:
+`%APPDATA%\FreeCAD\v1-1\Mod\ScriptCAD`
 
 ### To launch in FreeCAD:
 1. Start **FreeCAD**.
-2. In the workbench selector dropdown (at the top), choose **BlendCAD**.
-3. The **BlendCAD Scripting** panel will dock automatically on the right.
+2. In the workbench selector dropdown (at the top), choose **ScriptCAD**.
+3. The **ScriptCAD Scripting** panel will dock automatically on the right.
 4. Click **▶ Run (Alt+P)** to generate your first 3D object!
 
 ---
@@ -40,7 +40,7 @@ It is already linked directly to your FreeCAD 1.1 installation:
 
 ### 1. Primitives
 ```python
-from blendcad import *
+from scriptcad import *
 
 # Centered or corner-aligned primitives
 box = Box(length=40, width=40, height=10, center=True)

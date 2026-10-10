@@ -1,5 +1,5 @@
 """
-BlendCAD Mesh Art Engine:
+ScriptCAD Mesh Art Engine:
 Procedural 3D mesh generation, math surfaces, noise displacement,
 and seamless conversion into OpenCASCADE CAD solids.
 """
@@ -208,7 +208,7 @@ class MeshArt:
             return None
 
         if doc is None:
-            doc = App.ActiveDocument or App.newDocument("BlendCAD_Model")
+            doc = App.ActiveDocument or App.newDocument("ScriptCAD_Model")
 
         if as_solid:
             cad_solid = self.to_solid(make_solid=False)

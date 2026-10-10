@@ -1,6 +1,6 @@
 """
-BlendCAD High-Level Primitives:
-Clean, parametric CAD solid constructors mirroring Blender's procedural creation.
+ScriptCAD High-Level Primitives:
+Clean, parametric CAD solid constructors for procedural creation.
 """
 
 from typing import List, Tuple, Optional

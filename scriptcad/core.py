@@ -1,5 +1,5 @@
 """
-BlendCAD Core Engine: Fluent ShapeWrapper with Blender-like ergonomics,
+ScriptCAD Core Engine: Fluent ShapeWrapper with procedural ergonomics,
 transform chaining, and operator-overloaded CSG booleans for FreeCAD.
 """
 
@@ -241,7 +241,7 @@ class ShapeWrapper:
             res = self._shape.makeFillet(radius, target_edges)
             return ShapeWrapper(res)
         except Exception as e:
-            print(f"[BlendCAD Warning] Fillet failed: {e}")
+            print(f"[ScriptCAD Warning] Fillet failed: {e}")
             return self
 
     def chamfer(self, distance: float, edge_indices: Optional[List[int]] = None) -> "ShapeWrapper":
@@ -260,7 +260,7 @@ class ShapeWrapper:
             res = self._shape.makeChamfer(distance, target_edges)
             return ShapeWrapper(res)
         except Exception as e:
-            print(f"[BlendCAD Warning] Chamfer failed: {e}")
+            print(f"[ScriptCAD Warning] Chamfer failed: {e}")
             return self
 
     # --- Presentation & Display ---
@@ -282,13 +282,13 @@ class ShapeWrapper:
         directly in both Part Design and Part workbenches.
         """
         if App is None:
-            print(f"[BlendCAD] show({name}) called outside FreeCAD.")
+            print(f"[ScriptCAD] show({name}) called outside FreeCAD.")
             return None
 
         if doc is None:
             doc = App.ActiveDocument
             if doc is None:
-                doc = App.newDocument("BlendCAD_Model")
+                doc = App.newDocument("ScriptCAD_Model")
 
         # 1. PartDesign Body Mode (Default)
         if as_body or _DEFAULT_AS_BODY:
@@ -361,10 +361,10 @@ class ShapeWrapper:
         doc.recompute()
         return obj
 
-    def to_body(self, name: str = "BlendCAD_Body", doc=None):
+    def to_body(self, name: str = "ScriptCAD_Body", doc=None):
         """Directly instantiate this solid as an active PartDesign::Body container."""
         return self.show(name=name, doc=doc, as_body=True)
 
     def __repr__(self):
         vol = round(self.volume, 2)
-        return f"<BlendCAD ShapeWrapper(volume={vol})>"
+        return f"<ScriptCAD ShapeWrapper(volume={vol})>"

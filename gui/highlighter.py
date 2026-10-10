@@ -1,24 +1,24 @@
 """
-BlendCAD Syntax Highlighter:
-Blender-inspired dark theme Python syntax highlighting for PySide.
+ScriptCAD Syntax Highlighter:
+Dark theme Python syntax highlighting for PySide editor.
 """
 
 from .qt_compat import (
-    QSyntaxHighlighter, QTextCharFormat, QColor, QFont, QtCore
+    QSyntaxHighlighter, QTextCharFormat, QColor, QFont, QRegularExpression
 )
 
 
 class PythonHighlighter(QSyntaxHighlighter):
-    """Blender Dark Theme Python syntax highlighter."""
+    """Dark Theme Python syntax highlighter for ScriptCAD."""
 
     def __init__(self, document):
         super().__init__(document)
         self.rules = []
 
-        # Color Palette (Blender Dark Theme)
-        COLOR_KEYWORD = QColor("#ff944d")     # Blender Orange
+        # Color Palette
+        COLOR_KEYWORD = QColor("#ff944d")     # Orange
         COLOR_BUILTIN = QColor("#4dd0e1")     # Cyan
-        COLOR_BLENDCAD = QColor("#81c784")    # Soft Mint Green
+        COLOR_SCRIPTCAD = QColor("#81c784")   # Soft Mint Green
         COLOR_STRING = QColor("#9ccc65")      # Light Green
         COLOR_COMMENT = QColor("#78909c")     # Slate Grey
         COLOR_NUMBER = QColor("#ba68c8")      # Soft Violet
@@ -36,7 +36,7 @@ class PythonHighlighter(QSyntaxHighlighter):
             "True", "try", "while", "with", "yield", "async", "await"
         ]
         for kw in keywords:
-            pattern = QtCore.QRegularExpression(r"\b" + kw + r"\b")
+            pattern = QRegularExpression(r"\b" + kw + r"\b")
             self.rules.append((pattern, kw_fmt))
 
         # 2. Builtins
@@ -48,47 +48,47 @@ class PythonHighlighter(QSyntaxHighlighter):
             "min", "max", "sum", "abs", "round", "isinstance", "type"
         ]
         for b in builtins:
-            pattern = QtCore.QRegularExpression(r"\b" + b + r"\b")
+            pattern = QRegularExpression(r"\b" + b + r"\b")
             self.rules.append((pattern, builtin_fmt))
 
-        # 3. BlendCAD Core Functions & Classes
-        blendcad_fmt = QTextCharFormat()
-        blendcad_fmt.setForeground(COLOR_BLENDCAD)
-        blendcad_fmt.setFontWeight(QFont.Bold)
-        blendcad_symbols = [
+        # 3. ScriptCAD Core Functions & Classes
+        scriptcad_fmt = QTextCharFormat()
+        scriptcad_fmt.setForeground(COLOR_SCRIPTCAD)
+        scriptcad_fmt.setFontWeight(QFont.Bold)
+        scriptcad_symbols = [
             "ShapeWrapper", "Box", "Cube", "Cylinder", "Sphere", "Cone",
             "Torus", "Plane", "Circle", "Polygon", "Loft", "Extrude",
             "Revolve", "MeshArt", "clear_document", "active_document"
         ]
-        for sym in blendcad_symbols:
-            pattern = QtCore.QRegularExpression(r"\b" + sym + r"\b")
-            self.rules.append((pattern, blendcad_fmt))
+        for sym in scriptcad_symbols:
+            pattern = QRegularExpression(r"\b" + sym + r"\b")
+            self.rules.append((pattern, scriptcad_fmt))
 
         # 4. Function definitions
         fn_fmt = QTextCharFormat()
         fn_fmt.setForeground(COLOR_FUNCTION)
-        self.rules.append((QtCore.QRegularExpression(r"\bdef\s+([A-Za-z_][A-Za-z0-9_]*)"), fn_fmt))
+        self.rules.append((QRegularExpression(r"\bdef\s+([A-Za-z_][A-Za-z0-9_]*)"), fn_fmt))
 
         # 5. Numbers
         num_fmt = QTextCharFormat()
         num_fmt.setForeground(COLOR_NUMBER)
-        self.rules.append((QtCore.QRegularExpression(r"\b[0-9]+(\.[0-9]+)?\b"), num_fmt))
+        self.rules.append((QRegularExpression(r"\b[0-9]+(\.[0-9]+)?\b"), num_fmt))
 
         # 6. Single-line strings
         self.str_fmt = QTextCharFormat()
         self.str_fmt.setForeground(COLOR_STRING)
-        self.rules.append((QtCore.QRegularExpression(r'"[^"\\]*(\\.[^"\\]*)*"'), self.str_fmt))
-        self.rules.append((QtCore.QRegularExpression(r"'[^'\\]*(\\.[^'\\]*)*'"), self.str_fmt))
+        self.rules.append((QRegularExpression(r'"[^"\\]*(\\.[^"\\]*)*"'), self.str_fmt))
+        self.rules.append((QRegularExpression(r"'[^'\\]*(\\.[^'\\]*)*'"), self.str_fmt))
 
         # 7. Comments
         self.comment_fmt = QTextCharFormat()
         self.comment_fmt.setForeground(COLOR_COMMENT)
         self.comment_fmt.setFontItalic(True)
-        self.rules.append((QtCore.QRegularExpression(r"#[^\n]*"), self.comment_fmt))
+        self.rules.append((QRegularExpression(r"#[^\n]*"), self.comment_fmt))
 
         # Multi-line strings / docstrings regex
-        self.tri_double = QtCore.QRegularExpression(r'"""')
-        self.tri_single = QtCore.QRegularExpression(r"'''")
+        self.tri_double = QRegularExpression(r'"""')
+        self.tri_single = QRegularExpression(r"'''")
 
     def highlightBlock(self, text):
         # Apply standard single-line rules
@@ -113,15 +113,14 @@ class PythonHighlighter(QSyntaxHighlighter):
 
         while start_index >= 0:
             match = delimiter.match(text, start_index + 3)
-            end_index = match.capturedStart() if match.hasMatch() else -1
-            if end_index == -1:
+            match_len = match.capturedLength()
+            if match_len > 0:
+                end_index = match.capturedStart()
+                comment_length = end_index - start_index + match_len
+                self.setFormat(start_index, comment_length, self.str_fmt)
+                start_index = delimiter.match(text, start_index + comment_length).capturedStart()
+            else:
                 self.setCurrentBlockState(state)
                 comment_length = len(text) - start_index
-            else:
-                comment_length = end_index - start_index + 3
-
-            self.setFormat(start_index, comment_length, self.str_fmt)
-            if end_index == -1:
+                self.setFormat(start_index, comment_length, self.str_fmt)
                 break
-            match2 = delimiter.match(text, start_index + comment_length)
-            start_index = match2.capturedStart() if match2.hasMatch() else -1

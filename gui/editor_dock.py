@@ -1,6 +1,6 @@
 """
-BlendCAD Interactive Scripting Dock:
-Blender-inspired dockable code editor inside FreeCAD with live sync,
+ScriptCAD Interactive Scripting Dock:
+Interactive dockable code editor inside FreeCAD with live sync,
 syntax highlighting, line numbers, and instant execution.
 """
 
@@ -8,6 +8,7 @@ import sys
 import time
 import traceback
 import io
+from typing import Any
 from contextlib import redirect_stdout, redirect_stderr
 
 from .qt_compat import (
@@ -154,13 +155,13 @@ class CodeEditor(QPlainTextEdit):
         super().keyPressEvent(event)
 
 
-class BlendCADEditorDock(QDockWidget):
+class ScriptCADEditorDock(QDockWidget):
     """
-    Main Dock Widget housing the Blender-style code workspace.
+    Main Dock Widget housing the ScriptCAD code workspace.
     """
     def __init__(self, parent=None):
-        super().__init__("BlendCAD Scripting", parent)
-        self.setObjectName("BlendCADScriptingDock")
+        super().__init__("ScriptCAD Scripting", parent)
+        self.setObjectName("ScriptCADScriptingDock")
         self.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
 
         # Live Sync debouncing timer
@@ -386,20 +387,20 @@ class BlendCADEditorDock(QDockWidget):
                         pass
             doc.recompute()
             self.status_label.setText("Document cleared.")
-            self.console_output.appendPlainText("[BlendCAD] Cleared active document.")
+            self.console_output.appendPlainText("[ScriptCAD] Cleared active document.")
 
     def convert_selection_to_body(self):
         """Wrap selected Part solid into an active PartDesign Body."""
         try:
-            import blendcad
-            body = blendcad.convert_to_body()
+            import scriptcad
+            body = scriptcad.convert_to_body()
             if body:
                 self.status_label.setText(f"<span style='color: #81c784;'>✓ Converted into active Body: {body.Name}</span>")
-                self.console_output.appendPlainText(f"[BlendCAD] Successfully converted into active PartDesign::Body '{body.Name}'.")
+                self.console_output.appendPlainText(f"[ScriptCAD] Successfully converted into active PartDesign::Body '{body.Name}'.")
             else:
                 self.status_label.setText("<span style='color: #e57373;'>Select a Part solid to wrap into Body</span>")
         except Exception as e:
-            self.console_output.appendPlainText(f"[BlendCAD Error] Could not convert to Body: {e}")
+            self.console_output.appendPlainText(f"[ScriptCAD Error] Could not convert to Body: {e}")
 
     def execute_script(self, is_live=False):
         code = self.editor.toPlainText()
@@ -408,8 +409,8 @@ class BlendCADEditorDock(QDockWidget):
 
         # Sync PartDesign mode from checkbox
         try:
-            import blendcad
-            blendcad.set_partdesign_mode(self.chk_body.isChecked())
+            import scriptcad
+            scriptcad.set_partdesign_mode(self.chk_body.isChecked())
         except Exception:
             pass
 
@@ -419,23 +420,25 @@ class BlendCADEditorDock(QDockWidget):
 
         doc = None
         if App:
-            doc = App.ActiveDocument or App.newDocument("BlendCAD_Project")
-            doc.openTransaction("BlendCAD Run")
+            doc = App.ActiveDocument or App.newDocument("ScriptCAD_Project")
+            doc.openTransaction("ScriptCAD Run")
 
-        # Prepare execution namespace with blendcad pre-imported
-        scope = {
+        # Prepare execution namespace with scriptcad pre-imported
+        scope: dict[str, Any] = {
             "__name__": "__main__",
             "App": App,
             "Gui": Gui
         }
 
-        # Inject blendcad module symbols into scope
+        # Inject scriptcad module symbols into scope
         try:
-            import blendcad
-            for attr in blendcad.__all__:
-                scope[attr] = getattr(blendcad, attr)
+            import scriptcad
+            for attr in scriptcad.__all__:
+                scope[attr] = getattr(scriptcad, attr)
+            scope["scriptcad"] = scriptcad
+            scope["blendcad"] = scriptcad
         except Exception as e:
-            stdout_buf.write(f"[BlendCAD Warning] Could not pre-import blendcad: {e}\n")
+            stdout_buf.write(f"[ScriptCAD Warning] Could not pre-import scriptcad: {e}\n")
 
         success = True
         error_msg = ""
@@ -474,8 +477,8 @@ class BlendCADEditorDock(QDockWidget):
 
 # --- Preset Template Scripts ---
 
-PRESET_CSG = '''# BlendCAD: Quickstart CSG Solid
-from blendcad import *
+PRESET_CSG = '''# ScriptCAD: Quickstart CSG Solid
+from scriptcad import *
 
 # 1. Create base body
 body = Box(length=40, width=40, height=15, center=True)
@@ -494,9 +497,9 @@ for x in [-14, 14]:
 result.fillet(1.0).color(0.2, 0.6, 0.9).show("ParametricMount")
 '''
 
-PRESET_RADIAL_FINS = '''# BlendCAD: Radial Heat Sink / Turbofan Blades
+PRESET_RADIAL_FINS = '''# ScriptCAD: Radial Heat Sink / Turbofan Blades
 import math
-from blendcad import *
+from scriptcad import *
 
 core = Cylinder(r=12, h=30, center=True)
 hub = Cylinder(r=6, h=35, center=True)
@@ -512,9 +515,9 @@ for i in range(num_fins):
 assembly.color(0.85, 0.85, 0.88).show("TurbineRotor")
 '''
 
-PRESET_TWISTED_LOFT = '''# BlendCAD: Twisted Organic Vase (Loft Art)
+PRESET_TWISTED_LOFT = '''# ScriptCAD: Twisted Organic Vase (Loft Art)
 import math
-from blendcad import *
+from scriptcad import *
 
 profiles = []
 layers = 10
@@ -539,9 +542,9 @@ vase = Loft(profiles, solid=True)
 vase.color(0.9, 0.45, 0.2).show("TwistedVase")
 '''
 
-PRESET_MESH_WAVE = '''# BlendCAD: Procedural Mesh Art to CAD Solid
+PRESET_MESH_WAVE = '''# ScriptCAD: Procedural Mesh Art to CAD Solid
 import math
-from blendcad import *
+from scriptcad import *
 
 # 1. Generate 3D procedural wave surface
 wave = MeshArt.ripple_plane(size=60.0, resolution=25, wave_height=4.0, frequency=0.25)
@@ -550,8 +553,8 @@ wave = MeshArt.ripple_plane(size=60.0, resolution=25, wave_height=4.0, frequency
 wave.show(name="GenerativeWave", color=(0.1, 0.75, 0.7), as_solid=False)
 '''
 
-PRESET_ENCLOSURE = '''# BlendCAD: Electronics Enclosure with Screw Bosses
-from blendcad import *
+PRESET_ENCLOSURE = '''# ScriptCAD: Electronics Enclosure with Screw Bosses
+from scriptcad import *
 
 outer = Box(70, 50, 25, center=True).fillet(3.0)
 inner = Box(66, 46, 23, center=True).at(z=2)  # Hollow inside
@@ -566,3 +569,7 @@ for x in [-28, 28]:
 
 case.color(0.3, 0.3, 0.35).show("ProjectEnclosure")
 '''
+
+# Backward-compatibility alias
+BlendCADEditorDock = ScriptCADEditorDock
+
