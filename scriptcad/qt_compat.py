@@ -13,7 +13,8 @@ try:
     from PySide6.QtCore import Qt, QPoint, QRect, QSize, Signal, Slot, QTimer, QRegularExpression
     from PySide6.QtGui import (
         QColor, QFont, QFontMetrics, QPainter, QSyntaxHighlighter,
-        QTextCharFormat, QTextCursor, QTextFormat, QKeySequence, QShortcut, QIcon, QAction, QPalette
+        QTextCharFormat, QTextCursor, QTextFormat, QKeySequence, QShortcut, QIcon, QAction, QPalette,
+        QTextDocument, QGuiApplication
     )
     from PySide6.QtWidgets import (
         QWidget, QDockWidget, QPlainTextEdit, QTextEdit, QPushButton,
@@ -27,7 +28,8 @@ except ImportError:
         from PySide2.QtCore import Qt, QPoint, QRect, QSize, Signal, Slot, QTimer, QRegularExpression
         from PySide2.QtGui import (
             QColor, QFont, QFontMetrics, QPainter, QSyntaxHighlighter,
-            QTextCharFormat, QTextCursor, QTextFormat, QKeySequence, QShortcut, QIcon, QPalette
+            QTextCharFormat, QTextCursor, QTextFormat, QKeySequence, QShortcut, QIcon, QPalette,
+            QTextDocument, QGuiApplication
         )
         from PySide2.QtWidgets import (
             QWidget, QDockWidget, QPlainTextEdit, QTextEdit, QPushButton,

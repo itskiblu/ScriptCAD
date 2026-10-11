@@ -29,6 +29,7 @@ from .primitives import (
     Loft, Extrude, Revolve, Sweep, Helix, Spring, HelixSolid
 )
 from .mesh_art import MeshArt
+from .decompiler import decompile, ModelDecompiler, get_document_models
 
 
 def clear_document(doc=None):
@@ -69,6 +70,7 @@ __all__ = [
     "Plane", "Rectangle", "Circle", "Arc", "Ellipse", "Polygon", "Spline", "Slot", "Text",
     "Loft", "Extrude", "Revolve", "Sweep", "Helix", "Spring", "HelixSolid",
     "MeshArt",
+    "decompile", "ModelDecompiler", "get_document_models",
     "clear_document",
     "active_document",
     "Vector",

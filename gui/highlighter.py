@@ -117,9 +117,11 @@ class PythonHighlighter(QSyntaxHighlighter):
         cad_fmt.setFontWeight(QFont.Bold)
         cad_symbols = [
             "ShapeWrapper", "Box", "Cube", "Cylinder", "Sphere", "Cone",
-            "Torus", "Plane", "Circle", "Polygon", "Loft", "Extrude",
-            "Revolve", "Sweep", "Helix", "Spring", "Slot", "Text", "MeshArt",
-            "clear_document", "active_document", "convert_to_body"
+            "Torus", "Wedge", "Plane", "Rectangle", "Circle", "Arc", "Ellipse",
+            "Polygon", "Spline", "Slot", "Text", "Pipe", "Tube", "Loft", "Extrude",
+            "Revolve", "Sweep", "Helix", "Spring", "HelixSolid", "MeshArt",
+            "clear_document", "active_document", "convert_to_body",
+            "decompile", "ModelDecompiler", "get_document_models"
         ]
         for sym in cad_symbols:
             add_rule(r"\b" + sym + r"\b", cad_fmt)
@@ -156,29 +158,61 @@ class PythonHighlighter(QSyntaxHighlighter):
                 if start >= 0 and length > 0:
                     self.setFormat(start, length, fmt)
 
-        # Multi-line strings / docstrings
+        # Multi-line strings / docstrings (e.g. """...""" or '''...''')
+        prev_state = self.previousBlockState()
         self.setCurrentBlockState(0)
-        self._highlight_multiline(text, self.tri_double, 1)
-        self._highlight_multiline(text, self.tri_single, 2)
 
-    def _highlight_multiline(self, text, delimiter, state):
-        start_index = 0
-        if self.previousBlockState() == state:
-            start_index = 0
+        if prev_state == 2:
+            self._highlight_multiline(text, self.tri_single, 2)
+        elif prev_state == 1:
+            self._highlight_multiline(text, self.tri_double, 1)
         else:
-            match = delimiter.match(text)
-            start_index = match.capturedStart() if match.hasMatch() else -1
+            # Check which multiline delimiter appears first on this line
+            m_double = self.tri_double.match(text)
+            m_single = self.tri_single.match(text)
+            pos_double = m_double.capturedStart() if m_double.hasMatch() else -1
+            pos_single = m_single.capturedStart() if m_single.hasMatch() else -1
 
-        while start_index >= 0:
-            match = delimiter.match(text, start_index + 3)
-            match_len = match.capturedLength()
-            if match_len > 0:
-                end_index = match.capturedStart()
-                comment_length = end_index - start_index + match_len
-                self.setFormat(start_index, comment_length, self.str_fmt)
-                start_index = delimiter.match(text, start_index + comment_length).capturedStart()
-            else:
+            if pos_double != -1 and (pos_single == -1 or pos_double < pos_single):
+                self._highlight_multiline(text, self.tri_double, 1)
+            elif pos_single != -1:
+                self._highlight_multiline(text, self.tri_single, 2)
+
+    def _highlight_multiline(self, text: str, delimiter: QRegularExpression, state: int):
+        offset = 0
+        text_len = len(text)
+
+        # If line begins inside an open multiline string from a previous block
+        if self.previousBlockState() == state:
+            end_match = delimiter.match(text, 0)
+            if not end_match.hasMatch():
+                # Entire line is inside multiline string
                 self.setCurrentBlockState(state)
-                comment_length = len(text) - start_index
-                self.setFormat(start_index, comment_length, self.str_fmt)
+                self.setFormat(0, text_len, self.str_fmt)
+                return
+            else:
+                # Closing delimiter found on this line
+                end_idx = end_match.capturedStart()
+                delim_len = end_match.capturedLength()
+                closed_len = end_idx + delim_len
+                self.setFormat(0, closed_len, self.str_fmt)
+                offset = closed_len
+
+        # Search for any opening multiline string starting at offset
+        while offset < text_len:
+            start_match = delimiter.match(text, offset)
+            if not start_match.hasMatch():
+                break
+            open_idx = start_match.capturedStart()
+            end_match = delimiter.match(text, open_idx + 3)
+            if end_match.hasMatch():
+                end_idx = end_match.capturedStart()
+                delim_len = end_match.capturedLength()
+                closed_len = end_idx - open_idx + delim_len
+                self.setFormat(open_idx, closed_len, self.str_fmt)
+                offset = open_idx + closed_len
+            else:
+                # String remains unclosed at end of line
+                self.setCurrentBlockState(state)
+                self.setFormat(open_idx, text_len - open_idx, self.str_fmt)
                 break

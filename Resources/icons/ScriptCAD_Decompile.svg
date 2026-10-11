@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <!-- Solid Cube Gradients -->
+    <linearGradient id="cubeTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fcaf3e"/>
+      <stop offset="100%" stop-color="#f57900"/>
+    </linearGradient>
+    <linearGradient id="cubeLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f57900"/>
+      <stop offset="100%" stop-color="#ce5c00"/>
+    </linearGradient>
+    <linearGradient id="cubeRight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e9b96e"/>
+      <stop offset="100%" stop-color="#c17d11"/>
+    </linearGradient>
+    <!-- Script Document Gradient -->
+    <linearGradient id="docGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#eeeeec"/>
+    </linearGradient>
+    <!-- Arrow Gradient -->
+    <linearGradient id="arrowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#73d216"/>
+      <stop offset="100%" stop-color="#4e9a06"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 1. 3D CAD Cube on Left -->
+  <!-- Top Face -->
+  <polygon points="18,12 32,5 32,17 18,24" fill="url(#cubeTop)" stroke="#8f3900" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- Left Face -->
+  <polygon points="5,19 18,12 18,24 5,31" fill="url(#cubeRight)" stroke="#8f3900" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- Front Face -->
+  <polygon points="5,31 18,24 32,31 19,38" fill="url(#cubeLeft)" stroke="#8f3900" stroke-width="1.5" stroke-linejoin="round"/>
+
+  <!-- 2. Code Document on Right -->
+  <rect x="30" y="16" width="30" height="42" rx="3" fill="url(#docGrad)" stroke="#555753" stroke-width="2"/>
+  
+  <!-- Code lines on document -->
+  <line x1="36" y1="24" x2="54" y2="24" stroke="#3465a4" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="36" y1="30" x2="48" y2="30" stroke="#75507b" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="36" y1="36" x2="56" y2="36" stroke="#4e9a06" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="36" y1="42" x2="50" y2="42" stroke="#f57900" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="36" y1="48" x2="44" y2="48" stroke="#888a85" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- 3. Decompile Transition Arrow -->
+  <path d="M 17,46 C 17,54 26,55 30,51" fill="none" stroke="url(#arrowGrad)" stroke-width="3" stroke-linecap="round"/>
+  <polygon points="28,47 34,51 28,55" fill="#4e9a06"/>
+  <!-- Sparkle / Magic indicator -->
+  <polygon points="12,41 14,45 18,46 14,47 12,51 10,47 6,46 10,45" fill="#edd400" stroke="#c4a000" stroke-width="0.8"/>
+</svg>

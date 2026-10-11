@@ -18,6 +18,7 @@
 - **Collapsible Console Drawer**: Clean bottom drawer maximized for vertical screen real estate, auto-expanding if errors or exceptions occur (`Ctrl+` ` / `F8`).
 - **FreeCAD Native Tango Icons**: Uses FreeCAD's native Qt resource icons (`:/icons/`) with standalone vector SVG fallbacks.
 - **1-Click Multi-Format Export**: Export your generated model directly to **STEP** (`.step`), **STL** (`.stl`), or **OBJ** (`.obj`).
+- **🔄 3D Model Decompiler & Script Generator**: 1-click reverse-engineering (**`Ctrl+Shift+D`**) of manual FreeCAD models, CSG primitives, boolean trees, and PartDesign bodies into clean, editable, procedural Python scripts.
 - **PartDesign Body Integration**: Automatic or 1-click conversion into active `PartDesign::Body` containers for seamless parametric modeling workflows.
 - **Fluent & Pythonic CAD Solids**: Avoid verbose OpenCASCADE boilerplate. Create solids, apply transforms, and chain booleans with ease:
   - `a - b` : Boolean Cut (Difference)

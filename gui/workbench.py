@@ -35,6 +35,7 @@ ICON_NEW = get_icon("ScriptCAD_New.svg")
 ICON_OPEN = get_icon("ScriptCAD_Open.svg")
 ICON_SAVE = get_icon("ScriptCAD_Save.svg")
 ICON_TO_BODY = get_icon("ScriptCAD_ToBody.svg")
+ICON_DECOMPILE = get_icon("ScriptCAD_Decompile.svg")
 ICON_EXPORT = get_icon("ScriptCAD_Export.svg")
 ICON_CLEAR = get_icon("ScriptCAD_Clear.svg")
 
@@ -227,6 +228,29 @@ class ScriptCAD_ToBodyCommand:
             scriptcad.convert_to_body()
 
 
+class ScriptCAD_DecompileCommand:
+    """FreeCAD Command to decompile selected model or active document into procedural ScriptCAD code."""
+
+    def GetResources(self):
+        return {
+            'Pixmap': ICON_DECOMPILE,
+            'MenuText': translate('ScriptCAD', 'Decompile Model to Script'),
+            'ToolTip': translate('ScriptCAD', 'Generates procedural Python code from selected 3D model, or entire model if nothing is selected (Ctrl+Shift+D)'),
+            'Accel': 'Ctrl+Shift+D'
+        }
+
+    def IsActive(self):
+        return App.ActiveDocument is not None and bool(App.ActiveDocument.Objects)
+
+    def Activated(self):
+        dock = get_or_create_dock()
+        if dock is not None:
+            if not dock.isVisible():
+                dock.show()
+                dock.raise_()
+            dock.decompile_model_to_editor()
+
+
 class ScriptCAD_ExportSTEPCommand:
     """FreeCAD Command to export active solid to STEP file."""
 
@@ -324,6 +348,7 @@ ALL_COMMANDS = {
     'ScriptCAD_Save': ScriptCAD_SaveCommand(),
     'ScriptCAD_SaveAs': ScriptCAD_SaveAsCommand(),
     'ScriptCAD_ToBody': ScriptCAD_ToBodyCommand(),
+    'ScriptCAD_Decompile': ScriptCAD_DecompileCommand(),
     'ScriptCAD_ExportSTEP': ScriptCAD_ExportSTEPCommand(),
     'ScriptCAD_ExportSTL': ScriptCAD_ExportSTLCommand(),
     'ScriptCAD_ExportOBJ': ScriptCAD_ExportOBJCommand(),
@@ -385,6 +410,7 @@ class ScriptCADWorkbench(_BaseWB):
         # 3. ScriptCAD Solid & Export Toolbar
         self.appendToolbar("ScriptCAD Solid & Export", [
             'ScriptCAD_ToBody',
+            'ScriptCAD_Decompile',
             'ScriptCAD_ExportSTEP',
             'ScriptCAD_ExportSTL',
             'ScriptCAD_ExportOBJ',
@@ -402,6 +428,7 @@ class ScriptCADWorkbench(_BaseWB):
             'ScriptCAD_SaveAs',
             'Separator',
             'ScriptCAD_ToBody',
+            'ScriptCAD_Decompile',
             'ScriptCAD_ExportSTEP',
             'ScriptCAD_ExportSTL',
             'ScriptCAD_ExportOBJ',
@@ -428,6 +455,7 @@ class ScriptCADWorkbench(_BaseWB):
             'ScriptCAD_ToggleEditor',
             'ScriptCAD_Run',
             'ScriptCAD_ToBody',
+            'ScriptCAD_Decompile',
             'ScriptCAD_ClearDoc'
         ])
 

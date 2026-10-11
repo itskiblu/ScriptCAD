@@ -180,16 +180,26 @@ class ShapeWrapper:
         other_shape = other.shape if isinstance(other, ShapeWrapper) else other
         if other_shape is None:
             return self
-        return ShapeWrapper(self._shape.cut(other_shape))
+        cut_shape = self._shape.cut(other_shape)
+        try:
+            cut_shape = cut_shape.removeSplitter()
+        except Exception:
+            pass
+        return ShapeWrapper(cut_shape)
 
     def __add__(self, other: Union["ShapeWrapper", Any]) -> "ShapeWrapper":
         """Boolean Union / Fuse: `body + tool`"""
         if self._shape is None:
-            return self
+            return other if isinstance(other, ShapeWrapper) else ShapeWrapper(other)
         other_shape = other.shape if isinstance(other, ShapeWrapper) else other
         if other_shape is None:
             return self
-        return ShapeWrapper(self._shape.fuse(other_shape))
+        fused = self._shape.fuse(other_shape)
+        try:
+            fused = fused.removeSplitter()
+        except Exception:
+            pass
+        return ShapeWrapper(fused)
 
     def __and__(self, other: Union["ShapeWrapper", Any]) -> "ShapeWrapper":
         """Boolean Intersection / Common: `body & tool`"""
@@ -199,6 +209,18 @@ class ShapeWrapper:
         if other_shape is None:
             return self
         return ShapeWrapper(self._shape.common(other_shape))
+
+    def __isub__(self, other: Union["ShapeWrapper", Any]) -> "ShapeWrapper":
+        """In-place Boolean Cut: `body -= tool`"""
+        return self.__sub__(other)
+
+    def __iadd__(self, other: Union["ShapeWrapper", Any]) -> "ShapeWrapper":
+        """In-place Boolean Union: `body += tool`"""
+        return self.__add__(other)
+
+    def __iand__(self, other: Union["ShapeWrapper", Any]) -> "ShapeWrapper":
+        """In-place Boolean Intersection: `body &= tool`"""
+        return self.__and__(other)
 
     # --- Fluent Transforms & Placement ---
 
@@ -261,6 +283,47 @@ class ShapeWrapper:
         nx, ny, nz = norm_map.get(plane.upper(), (0, 0, 1))
         copied.mirror(App.Vector(0, 0, 0), App.Vector(nx, ny, nz))
         return ShapeWrapper(copied)
+
+    def extrude(self, distance: float = 10.0,
+                direction: Optional[Tuple[float, float, float]] = None) -> "ShapeWrapper":
+        """Extrude a 2D wire or face into a 3D solid along a direction vector or face normal."""
+        if Part is None or App is None or self._shape is None:
+            return self
+        shape = self._shape
+        if hasattr(shape, "ShapeType") and shape.ShapeType == "Wire":
+            try:
+                shape = Part.Face(shape)
+            except Exception:
+                pass
+        elif hasattr(shape, "Wires") and len(getattr(shape, "Faces", [])) == 0 and shape.Wires:
+            try:
+                shape = Part.Face(shape.Wires[0])
+            except Exception:
+                pass
+
+        if direction is not None:
+            dir_vec = App.Vector(*direction).normalize() * distance
+        else:
+            if hasattr(shape, "Faces") and shape.Faces:
+                try:
+                    norm = shape.Faces[0].normalAt(0, 0)
+                    dir_vec = norm.normalize() * distance
+                except Exception:
+                    dir_vec = App.Vector(0, 0, 1) * distance
+            else:
+                dir_vec = App.Vector(0, 0, 1) * distance
+
+        return ShapeWrapper(shape.extrude(dir_vec))
+
+    def revolve(self, axis: Tuple[float, float, float] = (0, 0, 1),
+                angle: float = 360.0,
+                center: Tuple[float, float, float] = (0, 0, 0)) -> "ShapeWrapper":
+        """Revolve a 2D wire or face around an axis into a 3D solid."""
+        if Part is None or App is None or self._shape is None:
+            return self
+        base_pt = App.Vector(*center)
+        dir_vec = App.Vector(*axis)
+        return ShapeWrapper(self._shape.revolve(base_pt, dir_vec, angle))
 
     # --- CAD Engineering Operations ---
 

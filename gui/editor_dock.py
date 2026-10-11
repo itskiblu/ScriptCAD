@@ -68,6 +68,7 @@ ICON_NEW = get_workbench_icon("ScriptCAD_New.svg", "document-new.svg")
 ICON_OPEN = get_workbench_icon("ScriptCAD_Open.svg", "document-open.svg")
 ICON_SAVE = get_workbench_icon("ScriptCAD_Save.svg", "document-save.svg")
 ICON_TO_BODY = get_workbench_icon("ScriptCAD_ToBody.svg", "PartDesign_Body.svg")
+ICON_DECOMPILE = get_workbench_icon("ScriptCAD_Decompile.svg", "document-revert.svg", "applications-python.svg")
 ICON_EXPORT = get_workbench_icon("ScriptCAD_Export.svg", "Std_Export.svg")
 ICON_CLEAR = get_workbench_icon("ScriptCAD_Clear.svg")
 ICON_FIND = get_workbench_icon("ScriptCAD_Find.svg", "edit-find.svg", "zoom-fit-best.svg")
@@ -576,9 +577,17 @@ class ScriptCADEditorDock(QDockWidget):
         self.btn_body.setToolTip(translate("ScriptCAD", "Wraps output solids into active PartDesign Body container"))
         self.toolbar.addWidget(self.btn_body)
 
+        # 4. Model Decompiler Action (Generate Script from Model)
+        self.btn_decompile = QToolButton()
+        self.btn_decompile.setObjectName("BtnDecompile")
+        self.btn_decompile.setIcon(QIcon(ICON_DECOMPILE))
+        self.btn_decompile.setToolTip(translate("ScriptCAD", "Decompile 3D model into procedural Python code (Ctrl+Shift+D). Auto-decompiles entire model if nothing is selected."))
+        self.btn_decompile.clicked.connect(self.decompile_model_to_editor)
+        self.toolbar.addWidget(self.btn_decompile)
+
         self.toolbar.addSeparator()
 
-        # 4. Templates & Recipes Dropdown (#4 Preset Geometry Generator)
+        # 5. Templates & Recipes Dropdown (#5 Preset Geometry Generator)
         self.btn_templates = QToolButton()
         self.btn_templates.setObjectName("BtnTemplates")
         self.btn_templates.setIcon(QIcon(ICON_TEMPLATES))
@@ -762,6 +771,10 @@ class ScriptCADEditorDock(QDockWidget):
 
         self.sc_ctrl_n = QShortcut(QKeySequence("Ctrl+N"), self)
         self.sc_ctrl_n.activated.connect(self.new_script)
+
+        # Decompile shortcut
+        self.sc_decompile = QShortcut(QKeySequence("Ctrl+Shift+D"), self)
+        self.sc_decompile.activated.connect(self.decompile_model_to_editor)
 
         # Find shortcut
         self.sc_ctrl_f = QShortcut(QKeySequence("Ctrl+F"), self)
@@ -1088,6 +1101,78 @@ class ScriptCADEditorDock(QDockWidget):
                 self.status_label.setText("Select a Part solid to wrap into Body")
         except Exception as e:
             self.console_output.appendPlainText(f"[ScriptCAD Error] Could not convert to Body: {e}")
+
+    def decompile_model_to_editor(self):
+        """Decompile the selected FreeCAD 3D object or active document into procedural code."""
+        if App is None or App.ActiveDocument is None:
+            self.console_output.appendPlainText("[ScriptCAD] No active FreeCAD document to decompile.")
+            self.status_label.setText("No active document.")
+            return
+
+        try:
+            import importlib
+            import scriptcad.core
+            import scriptcad.primitives
+            import scriptcad.decompiler
+            importlib.reload(scriptcad.core)
+            importlib.reload(scriptcad.primitives)
+            importlib.reload(scriptcad.decompiler)
+            from scriptcad.decompiler import decompile, get_document_models
+        except Exception:
+            from scriptcad.decompiler import decompile, get_document_models
+
+        targets = []
+        if Gui is not None:
+            try:
+                targets = list(Gui.Selection.getSelection())
+            except Exception:
+                pass
+
+        is_whole_model = False
+        if not targets:
+            # If no part is selected, auto-decompile the entire model in the document
+            targets = get_document_models(App.ActiveDocument)
+            is_whole_model = True
+
+        if not targets:
+            self.console_output.appendPlainText("[ScriptCAD] No 3D models found in active document.")
+            self.status_label.setText("No 3D models found.")
+            return
+
+        target_names = ", ".join(getattr(t, "Label", t.Name) for t in targets)
+        if is_whole_model:
+            self.console_output.appendPlainText(f"[ScriptCAD] No part selected: auto-generating script for entire model ({target_names})...")
+            self.status_label.setText(f"Auto-decompiling entire model ({target_names})...")
+        else:
+            self.console_output.appendPlainText(f"[ScriptCAD] Decompiling selected 3D model: {target_names}...")
+            self.status_label.setText(f"Decompiling {target_names}...")
+
+        try:
+            generated_script = decompile(targets, doc=App.ActiveDocument, whole_model=is_whole_model)
+            if self.is_modified and len(self.editor.toPlainText().strip()) > 30:
+                scope_msg = f"the whole model ({target_names})" if is_whole_model else f"'{target_names}'"
+                ret = QMessageBox.question(
+                    self, "Decompile Model",
+                    f"Replace current editor script with code for {scope_msg}?",
+                    QMessageBox.Yes | QMessageBox.No
+                )
+                if ret != QMessageBox.Yes:
+                    self.console_output.appendPlainText("[ScriptCAD] Decompilation cancelled by user.")
+                    self.status_label.setText("Decompilation cancelled.")
+                    return
+
+            self.editor.setPlainText(generated_script)
+            self.current_filepath = None
+            self.is_modified = False
+            self.update_dock_title()
+            scope_done = f"Entire model ({target_names})" if is_whole_model else f"Model '{target_names}'"
+            self.status_label.setText(f"✓ Decompiled: {scope_done}")
+            self.console_output.appendPlainText(f"[ScriptCAD] Successfully generated procedural script for {scope_done}!")
+        except Exception as e:
+            import traceback
+            tb = traceback.format_exc()
+            self.console_output.appendPlainText(f"[ScriptCAD Error] Decompilation failed: {e}\n{tb}")
+            self.status_label.setText("Decompilation error.")
 
     def execute_script(self, is_live: bool = False):
         code = self.editor.toPlainText()

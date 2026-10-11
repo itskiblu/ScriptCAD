@@ -166,16 +166,27 @@ def Plane(length: float = 10.0,
     return wrapper
 
 
-def Rectangle(length: float = 10.0,
-              width: float = 10.0,
+def Rectangle(length: Optional[float] = None,
+              width: Optional[float] = None,
+              height: Optional[float] = None,
               center: bool = False,
               filled: bool = True) -> ShapeWrapper:
-    """Construct a 2D rectangle (wire or filled face)."""
-    return Plane(length=length, width=width, center=center) if filled else Polygon([
-        (-length / 2 if center else 0, -width / 2 if center else 0, 0),
-        (length / 2 if center else length, -width / 2 if center else 0, 0),
-        (length / 2 if center else length, width / 2 if center else width, 0),
-        (-length / 2 if center else 0, width / 2 if center else width, 0)
+    """Construct a 2D rectangle (wire or filled face). Supports length/width or width/height."""
+    if length is None:
+        l = width if width is not None else 10.0
+        w = height if height is not None else 10.0
+    else:
+        l = length
+        if height is not None and width is None:
+            w = height
+        else:
+            w = width if width is not None else (height if height is not None else 10.0)
+
+    return Plane(length=l, width=w, center=center) if filled else Polygon([
+        (-l / 2 if center else 0, -w / 2 if center else 0, 0),
+        (l / 2 if center else l, -w / 2 if center else 0, 0),
+        (l / 2 if center else l, w / 2 if center else w, 0),
+        (-l / 2 if center else 0, w / 2 if center else w, 0)
     ], filled=False)
 
 
