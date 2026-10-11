@@ -45,7 +45,13 @@ _scriptcad_dock = None
 def get_or_create_dock():
     """Retrieve or instantiate the ScriptCAD scripting dock widget."""
     global _scriptcad_dock
-    from gui.editor_dock import ScriptCADEditorDock
+    import importlib
+    try:
+        import gui.editor_dock
+        importlib.reload(gui.editor_dock)
+    except Exception:
+        pass
+    from gui.editor_dock import ScriptCADEditorDock, CustomDockTitleBar
     from gui.qt_compat import Qt
 
     main_win = Gui.getMainWindow()
@@ -55,6 +61,9 @@ def get_or_create_dock():
     if _scriptcad_dock is None:
         _scriptcad_dock = ScriptCADEditorDock(main_win)
         main_win.addDockWidget(Qt.RightDockWidgetArea, _scriptcad_dock)
+    else:
+        # Refresh title bar to ensure live updates take effect immediately
+        _scriptcad_dock.setTitleBarWidget(CustomDockTitleBar(_scriptcad_dock))
     return _scriptcad_dock
 
 

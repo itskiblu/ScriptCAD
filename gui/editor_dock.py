@@ -22,7 +22,7 @@ from .qt_compat import (
     QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QCheckBox, QSplitter,
     QToolBar, QToolButton, QColor, QFont, QPainter, QRect, QSize, QTextFormat,
     Qt, QTimer, QKeySequence, QShortcut, QFileDialog, QMessageBox,
-    QLineEdit, QMenu, QAction, QIcon, QSizePolicy, QPalette
+    QLineEdit, QMenu, QAction, QIcon, QSizePolicy, QPalette, QStyle
 )
 from .highlighter import PythonHighlighter
 
@@ -74,6 +74,13 @@ ICON_FIND = get_workbench_icon("ScriptCAD_Find.svg", "edit-find.svg", "zoom-fit-
 ICON_TEMPLATES = get_workbench_icon("ScriptCAD_Templates.svg", "MacroEditor.svg", "applications-python.svg")
 ICON_CONSOLE = get_workbench_icon("ScriptCAD_Console.svg")
 ICON_MENU_ARROW = get_icon_path("menu_arrow.svg")
+ICON_WORKBENCH = get_workbench_icon("ScriptCAD_Workbench.svg", "ScriptCAD_Workbench.svg", "freecad.svg")
+ICON_DOCK_OVERLAY = get_icon_path("dock_overlay.svg")
+ICON_DOCK_OVERLAY_HOVER = get_icon_path("dock_overlay_hover.svg")
+ICON_DOCK_FLOAT = get_icon_path("dock_float.svg")
+ICON_DOCK_FLOAT_HOVER = get_icon_path("dock_float_hover.svg")
+ICON_DOCK_CLOSE = get_icon_path("dock_close.svg")
+ICON_DOCK_CLOSE_HOVER = get_icon_path("dock_close_hover.svg")
 
 
 def _get_editor_pref(key: str, default: Any) -> Any:
@@ -289,6 +296,145 @@ class CodeEditor(QPlainTextEdit):
         super().keyPressEvent(event)
 
 
+class CustomDockTitleBar(QWidget):
+    """
+    Exact replica of FreeCAD's native Gui::OverlayTitleBar.
+    Matches height (18px), solid dark background (#1e1e1e), centered title,
+    and 3 buttons on the right matching FreeCAD's exact overlay button styling:
+    OBTN_Overlay, OBTN_Float, and OBTN_Close.
+    """
+
+    def __init__(self, dock: QDockWidget):
+        super().__init__(dock)
+        self.dock = dock
+        self.setObjectName("OverlayTitle")
+        self.setFixedHeight(18)
+
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(1, 1, 6, 1)
+        layout.setSpacing(6)
+
+        # Space out the left and center so paintEvent renders the centered title
+        layout.addStretch()
+
+        # 1. Overlay Button
+        self.btn_overlay = QToolButton(self)
+        self.btn_overlay.setObjectName("OBTN_Overlay")
+        self.btn_overlay.setFixedSize(16, 16)
+        self.btn_overlay.setToolTip(translate("ScriptCAD", "Toggle overlay"))
+        self.btn_overlay.clicked.connect(self._toggle_floating)
+        layout.addWidget(self.btn_overlay)
+
+        # 2. Float / Undock Button
+        self.btn_float = QToolButton(self)
+        self.btn_float.setObjectName("OBTN_Float")
+        self.btn_float.setFixedSize(16, 16)
+        self.btn_float.setToolTip(translate("ScriptCAD", "Toggle floating window"))
+        self.btn_float.clicked.connect(self._toggle_floating)
+        layout.addWidget(self.btn_float)
+
+        # 3. Close Button
+        self.btn_close = QToolButton(self)
+        self.btn_close.setObjectName("OBTN_Close")
+        self.btn_close.setFixedSize(16, 16)
+        self.btn_close.setToolTip(translate("ScriptCAD", "Close dock window"))
+        self.btn_close.clicked.connect(self.dock.close)
+        layout.addWidget(self.btn_close)
+
+        self.dock.windowTitleChanged.connect(lambda _: self.update())
+        self.apply_theme()
+
+    def apply_theme(self):
+        is_dark = True
+        try:
+            is_dark = self.palette().color(QPalette.Window).lightness() < 128
+        except Exception:
+            pass
+
+        if is_dark:
+            bg_bar = "#1e1e1e"
+            btn_bg = "#262626"
+            btn_border = "#141414"
+            btn_hover_bg = "#383838"
+            btn_hover_border = "#202020"
+            btn_pressed_bg = "#1a1a1a"
+            btn_pressed_border = "#0d0d0d"
+        else:
+            bg_bar = "#e0e0e0"
+            btn_bg = "#d4d4d4"
+            btn_border = "#a8a8a8"
+            btn_hover_bg = "#c8c8c8"
+            btn_hover_border = "#909090"
+            btn_pressed_bg = "#b8b8b8"
+            btn_pressed_border = "#787878"
+
+        self.setStyleSheet(f"""
+            QWidget#OverlayTitle {{
+                background-color: {bg_bar};
+            }}
+            QToolButton {{
+                background-color: {btn_bg};
+                border: 1px solid {btn_border};
+                border-radius: 3px;
+                padding: 2px;
+                margin: 0px;
+            }}
+            QToolButton:hover {{
+                background-color: {btn_hover_bg};
+                border: 1px solid {btn_hover_border};
+            }}
+            QToolButton:pressed {{
+                background-color: {btn_pressed_bg};
+                border: 1px solid {btn_pressed_border};
+            }}
+            QToolButton#OBTN_Overlay {{
+                image: url({ICON_DOCK_OVERLAY});
+            }}
+            QToolButton#OBTN_Overlay:hover {{
+                image: url({ICON_DOCK_OVERLAY_HOVER});
+            }}
+            QToolButton#OBTN_Float {{
+                image: url({ICON_DOCK_FLOAT});
+            }}
+            QToolButton#OBTN_Float:hover {{
+                image: url({ICON_DOCK_FLOAT_HOVER});
+            }}
+            QToolButton#OBTN_Close {{
+                image: url({ICON_DOCK_CLOSE});
+            }}
+        """)
+
+    def paintEvent(self, event):
+        super().paintEvent(event)
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.TextAntialiasing)
+
+        is_dark = True
+        try:
+            is_dark = self.palette().color(QPalette.Window).lightness() < 128
+        except Exception:
+            pass
+
+        painter.setPen(QColor("#ffffff" if is_dark else "#000000"))
+        font = QFont("Segoe UI", 9)
+        font.setBold(False)
+        painter.setFont(font)
+
+        title = self.dock.windowTitle() or "ScriptCAD"
+        # Center horizontally and vertically across the title bar
+        painter.drawText(self.rect(), Qt.AlignCenter, title)
+
+    def mouseDoubleClickEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self._toggle_floating()
+            event.accept()
+        else:
+            super().mouseDoubleClickEvent(event)
+
+    def _toggle_floating(self):
+        self.dock.setFloating(not self.dock.isFloating())
+
+
 class ScriptCADEditorDock(QDockWidget):
     """
     Main Dock Widget housing the ScriptCAD procedural modeling workspace.
@@ -296,7 +442,7 @@ class ScriptCADEditorDock(QDockWidget):
     """
 
     def __init__(self, parent=None):
-        super().__init__("ScriptCAD Scripting", parent)
+        super().__init__("ScriptCAD", parent)
         self.setObjectName("ScriptCADScriptingDock")
         self.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
 
@@ -313,18 +459,23 @@ class ScriptCADEditorDock(QDockWidget):
         self.setup_shortcuts()
         self.load_default_script()
 
+        # Custom header matching FreeCAD's Model panel header
+        self.title_bar = CustomDockTitleBar(self)
+        self.setTitleBarWidget(self.title_bar)
+        self.update_dock_title()
+
     def setup_ui(self):
         container = QWidget()
         layout = QVBoxLayout(container)
-        layout.setContentsMargins(2, 2, 2, 2)
-        layout.setSpacing(2)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
 
         # Container styling conforming to FreeCAD's native top bar aesthetic
         container.setStyleSheet(f"""
             QToolBar {{
-                background-color: #202020;
+                background-color: #191919;
                 border: none;
-                border-bottom: 1px solid #2d2d2d;
+                border-bottom: 1px solid #282828;
                 spacing: 2px;
                 padding: 2px 4px;
             }}
@@ -725,9 +876,11 @@ class ScriptCADEditorDock(QDockWidget):
         return self.save_script()
 
     def update_dock_title(self):
-        name = os.path.basename(self.current_filepath) if self.current_filepath else "Untitled"
-        mod_star = "*" if self.is_modified else ""
-        self.setWindowTitle(f"ScriptCAD Scripting - [{name}{mod_star}]")
+        star = " *" if self.is_modified else ""
+        if self.current_filepath:
+            self.setWindowTitle(f"ScriptCAD - {os.path.basename(self.current_filepath)}{star}")
+        else:
+            self.setWindowTitle(f"ScriptCAD{star}")
 
     # --- Find Bar ---
 

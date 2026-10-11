@@ -18,7 +18,7 @@ try:
     from PySide6.QtWidgets import (
         QWidget, QDockWidget, QPlainTextEdit, QTextEdit, QPushButton,
         QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QCheckBox, QSplitter,
-        QToolBar, QToolButton, QStatusBar, QMessageBox, QFileDialog, QSizePolicy, QLineEdit, QMenu
+        QToolBar, QToolButton, QStatusBar, QMessageBox, QFileDialog, QSizePolicy, QLineEdit, QMenu, QStyle
     )
     PYSIDE_VERSION = 6
 except ImportError:
@@ -32,7 +32,7 @@ except ImportError:
         from PySide2.QtWidgets import (
             QWidget, QDockWidget, QPlainTextEdit, QTextEdit, QPushButton,
             QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QCheckBox, QSplitter,
-            QToolBar, QToolButton, QStatusBar, QMessageBox, QFileDialog, QSizePolicy, QLineEdit, QMenu, QAction
+            QToolBar, QToolButton, QStatusBar, QMessageBox, QFileDialog, QSizePolicy, QLineEdit, QMenu, QAction, QStyle
         )
         PYSIDE_VERSION = 2
     except ImportError:
@@ -90,5 +90,6 @@ except ImportError:
         QSizePolicy: Any = _DummyQt
         QLineEdit: Any = _DummyQt
         QMenu: Any = _DummyQt
+        QStyle: Any = _DummyQt
 
         PYSIDE_VERSION = 0
