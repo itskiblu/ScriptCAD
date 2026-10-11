@@ -3,14 +3,27 @@
   <name>ScriptCAD</name>
   <description>Procedural CAD solid modeling and 3D mesh art scripting workbench with an integrated live code editor for FreeCAD.</description>
   <version>1.0.0</version>
-  <date>2026-10-10</date>
+  <date>2026-10-11</date>
   <maintainer email="itskiblu@users.noreply.github.com">ScriptCAD Team</maintainer>
+  <author email="itskiblu@users.noreply.github.com">ScriptCAD Team</author>
   <license file="LICENSE">LGPL-2.1-or-later</license>
   <url type="repository" branch="main">https://github.com/itskiblu/ScriptCAD</url>
-  <url type="readme">README.md</url>
-  <url type="changelog">CHANGELOG.md</url>
+  <url type="readme">https://raw.githubusercontent.com/itskiblu/ScriptCAD/main/README.md</url>
+  <url type="bugtracker">https://github.com/itskiblu/ScriptCAD/issues</url>
+  <url type="documentation">https://github.com/itskiblu/ScriptCAD/blob/main/CHANGELOG.md</url>
+  <url type="discussion">https://forum.freecad.org/</url>
   <icon>Resources/icons/ScriptCAD_Workbench.svg</icon>
   <freecadmin>0.20.0</freecadmin>
+  <pythonmin>3.8</pythonmin>
+  <tag>workbench</tag>
+  <tag>cad</tag>
+  <tag>scripting</tag>
+  <tag>python</tag>
+  <tag>parametric</tag>
+  <tag>mesh</tag>
+  <tag>csg</tag>
+  <tag>solid-modeling</tag>
+  <tag>code-editor</tag>
   <content>
     <workbench>
       <name>ScriptCAD</name>
@@ -21,3 +34,4 @@
     </workbench>
   </content>
 </package>
+

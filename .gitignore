@@ -15,3 +15,12 @@ Thumbs.db
 .idea/
 *.swp
 *.bak
+
+# Build and distribution artifacts
+dist/
+build/
+*.egg-info/
+*.zip
+*.sha256
+.pytest_cache/
+

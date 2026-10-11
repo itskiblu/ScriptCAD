@@ -49,13 +49,13 @@ def clear_document(doc=None):
     doc.recompute()
 
 
-def active_document():
+def active_document(name: str = "ScriptCAD_Project"):
     """Get or create the active FreeCAD document."""
     if App is None:
         return None
     doc = App.ActiveDocument
     if doc is None:
-        doc = App.newDocument("ScriptCAD_Project")
+        doc = App.newDocument(name)
     return doc
 
 

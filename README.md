@@ -49,18 +49,48 @@
 ## Installation
 
 ### Method 1: FreeCAD Addon Manager (Recommended)
+
+#### Option A: Direct Search (When listed in Addon Index)
 1. Open FreeCAD.
-2. Go to **Tools → Addon Manager**.
+2. Navigate to **Tools → Addon Manager**.
 3. Select the **Workbenches** tab.
 4. Search for **ScriptCAD** and click **Install**.
 5. Restart FreeCAD when prompted.
 
-### Method 2: Manual Installation (Git Clone)
-Clone the repository directly into your FreeCAD `Mod` directory:
+#### Option B: Add Custom Repository (Available immediately)
+1. Open FreeCAD.
+2. Open **Tools → Addon Manager**.
+3. Click the **Configure... (Gear ⚙ icon)** at the bottom.
+4. Under **Custom repositories**, click **+ Add repository**.
+5. Enter `https://github.com/itskiblu/ScriptCAD` and branch `main`.
+6. Click **Save**, search for **ScriptCAD**, and click **Install**!
+
+---
+
+### Method 2: Universal 1-Click Installer (`install.py`)
+Clone or download this repository, open a terminal in the folder, and run:
+
+```bash
+# Developer / live-sync link mode (symlink / junction):
+python install.py
+
+# Or standalone copy mode (copies files directly into FreeCAD Mod):
+python install.py --copy
+```
+
+`install.py` auto-detects FreeCAD 1.1, 1.0, and 0.2x directories on Windows, Linux, and macOS. To uninstall at any time:
+```bash
+python install.py --uninstall
+```
+
+---
+
+### Method 3: Manual Installation (Git Clone or ZIP)
+Clone or extract the repository directly into your FreeCAD `Mod` directory:
 
 - **Windows**:
   ```powershell
-  cd "%APPDATA%\FreeCAD\Mod"
+  cd "$env:APPDATA\FreeCAD\v1-1\Mod"  # or "$env:APPDATA\FreeCAD\Mod"
   git clone https://github.com/itskiblu/ScriptCAD.git
   ```
 
@@ -75,6 +105,14 @@ Clone the repository directly into your FreeCAD `Mod` directory:
   cd ~/Library/Application\ Support/FreeCAD/Mod
   git clone https://github.com/itskiblu/ScriptCAD.git
   ```
+
+---
+
+### Method 4: Offline ZIP Archive
+1. Download `ScriptCAD-v1.0.0.zip` from [GitHub Releases](https://github.com/itskiblu/ScriptCAD/releases).
+2. Extract the `ScriptCAD` folder into your FreeCAD `Mod` directory (or use **Addon Manager → Install from file...**).
+3. Restart FreeCAD.
+
 
 ---
 
