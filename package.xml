@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <package format="1" xmlns="https://wiki.freecad.org/Package_Metadata">
   <name>ScriptCAD</name>
-  <description>Procedural CAD solid modeling and 3D mesh art scripting workbench for FreeCAD.</description>
+  <description>Procedural CAD solid modeling and 3D mesh art scripting workbench with an integrated live code editor for FreeCAD.</description>
   <version>1.0.0</version>
   <date>2026-10-10</date>
-  <maintainer email="user@example.com">ScriptCAD Team</maintainer>
-  <license>LGPL-2.1-or-later</license>
+  <maintainer email="itskiblu@users.noreply.github.com">ScriptCAD Team</maintainer>
+  <license file="LICENSE">LGPL-2.1-or-later</license>
   <url type="repository" branch="main">https://github.com/itskiblu/ScriptCAD</url>
+  <url type="readme">README.md</url>
+  <url type="changelog">CHANGELOG.md</url>
   <icon>Resources/icons/ScriptCAD_Workbench.svg</icon>
+  <freecadmin>0.20.0</freecadmin>
   <content>
     <workbench>
       <name>ScriptCAD</name>
       <classname>ScriptCADWorkbench</classname>
+      <description>Procedural Python CAD scripting workspace with live sync</description>
       <subdirectory>./</subdirectory>
       <icon>Resources/icons/ScriptCAD_Workbench.svg</icon>
     </workbench>

@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+# SPDX-FileCopyrightText: 2026 ScriptCAD Team
+
 """
 Cross-version PySide compatibility layer for ScriptCAD.
 Supports PySide6 (FreeCAD 1.0+) and PySide2 (FreeCAD 0.20/0.21).
@@ -10,12 +13,12 @@ try:
     from PySide6.QtCore import Qt, QPoint, QRect, QSize, Signal, Slot, QTimer, QRegularExpression
     from PySide6.QtGui import (
         QColor, QFont, QFontMetrics, QPainter, QSyntaxHighlighter,
-        QTextCharFormat, QTextCursor, QTextFormat, QKeySequence, QShortcut, QIcon
+        QTextCharFormat, QTextCursor, QTextFormat, QKeySequence, QShortcut, QIcon, QAction, QPalette
     )
     from PySide6.QtWidgets import (
         QWidget, QDockWidget, QPlainTextEdit, QTextEdit, QPushButton,
         QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QCheckBox, QSplitter,
-        QToolBar, QStatusBar, QMessageBox, QFileDialog, QSizePolicy
+        QToolBar, QToolButton, QStatusBar, QMessageBox, QFileDialog, QSizePolicy, QLineEdit, QMenu
     )
     PYSIDE_VERSION = 6
 except ImportError:
@@ -24,12 +27,12 @@ except ImportError:
         from PySide2.QtCore import Qt, QPoint, QRect, QSize, Signal, Slot, QTimer, QRegularExpression
         from PySide2.QtGui import (
             QColor, QFont, QFontMetrics, QPainter, QSyntaxHighlighter,
-            QTextCharFormat, QTextCursor, QTextFormat, QKeySequence, QShortcut, QIcon
+            QTextCharFormat, QTextCursor, QTextFormat, QKeySequence, QShortcut, QIcon, QPalette
         )
         from PySide2.QtWidgets import (
             QWidget, QDockWidget, QPlainTextEdit, QTextEdit, QPushButton,
             QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QCheckBox, QSplitter,
-            QToolBar, QStatusBar, QMessageBox, QFileDialog, QSizePolicy
+            QToolBar, QToolButton, QStatusBar, QMessageBox, QFileDialog, QSizePolicy, QLineEdit, QMenu, QAction
         )
         PYSIDE_VERSION = 2
     except ImportError:
@@ -65,12 +68,15 @@ except ImportError:
         QKeySequence: Any = _DummyQt
         QShortcut: Any = _DummyQt
         QIcon: Any = _DummyQt
+        QAction: Any = _DummyQt
+        QPalette: Any = _DummyQt
 
         QWidget: Any = object
         QDockWidget: Any = object
         QPlainTextEdit: Any = object
         QTextEdit: Any = object
         QPushButton: Any = _DummyQt
+        QToolButton: Any = _DummyQt
         QVBoxLayout: Any = _DummyQt
         QHBoxLayout: Any = _DummyQt
         QLabel: Any = _DummyQt
@@ -82,5 +88,7 @@ except ImportError:
         QMessageBox: Any = _DummyQt
         QFileDialog: Any = _DummyQt
         QSizePolicy: Any = _DummyQt
+        QLineEdit: Any = _DummyQt
+        QMenu: Any = _DummyQt
 
         PYSIDE_VERSION = 0

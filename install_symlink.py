@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+# SPDX-FileCopyrightText: 2026 ScriptCAD Team
+
 """
 ScriptCAD Installation & Linker:
 Creates a directory junction from this repository into FreeCAD's Mod folder.

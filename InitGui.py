@@ -1,6 +1,9 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+# SPDX-FileCopyrightText: 2026 ScriptCAD Team
+
 """
 ScriptCAD FreeCAD Workbench Registration:
-Initializes the workbench, dockable script editor panel, commands, and toolbar.
+Initializes the GUI workbench, commands, toolbars, and dock editor.
 """
 
 import os
@@ -16,24 +19,31 @@ if _wb_dir not in sys.path:
 try:
     from gui.workbench import (
         ScriptCADWorkbench,
-        ScriptCAD_ToggleEditorCommand,
-        ScriptCAD_ClearDocCommand,
-        # Backward-compat aliases
+        register_all_commands,
+        # Backward-compatibility aliases
         BlendCADWorkbench,
         BlendCAD_ToggleEditorCommand,
         BlendCAD_ClearDocCommand,
     )
 
+    # Register all native FreeCAD commands
+    register_all_commands()
+
+    # Legacy command aliases for backward compatibility
     if hasattr(Gui, "addCommand"):
-        Gui.addCommand("ScriptCAD_ToggleEditor", ScriptCAD_ToggleEditorCommand())
-        Gui.addCommand("ScriptCAD_ClearDoc", ScriptCAD_ClearDocCommand())
-        # Alias old command names for safety
         Gui.addCommand("BlendCAD_ToggleEditor", BlendCAD_ToggleEditorCommand())
         Gui.addCommand("BlendCAD_ClearDoc", BlendCAD_ClearDocCommand())
 
+    # Register workbench with FreeCAD GUI
     if hasattr(Gui, "addWorkbench"):
         Gui.addWorkbench(ScriptCADWorkbench())
+        if hasattr(App, "Console"):
+            App.Console.PrintLog("[ScriptCAD] Workbench successfully registered.\n")
     else:
-        print("[ScriptCAD] Module loaded. (Workbench will register in FreeCAD GUI)")
+        if hasattr(App, "Console"):
+            App.Console.PrintMessage("[ScriptCAD] Module loaded.\n")
 except Exception as e:
-    App.Console.PrintError(f"[ScriptCAD] Error loading workbench in InitGui.py: {e}\n")
+    if hasattr(App, "Console"):
+        App.Console.PrintError(f"[ScriptCAD] Error loading workbench in InitGui.py: {e}\n")
+    else:
+        print(f"[ScriptCAD] Error loading workbench in InitGui.py: {e}")

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="expGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8ae234"/>
+      <stop offset="100%" stop-color="#73d216"/>
+    </linearGradient>
+    <linearGradient id="boxGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d3d7cf"/>
+      <stop offset="100%" stop-color="#888a85"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Base CAD Component Box -->
+  <polygon points="24,24 40,16 52,23 36,31" fill="#d3d7cf" stroke="#555753" stroke-width="2" stroke-linejoin="round"/>
+  <polygon points="24,24 36,31 36,52 24,45" fill="#888a85" stroke="#555753" stroke-width="2" stroke-linejoin="round"/>
+  <polygon points="36,31 52,23 52,44 36,52" fill="#babdb6" stroke="#555753" stroke-width="2" stroke-linejoin="round"/>
+
+  <!-- Export Vector Arrow (Tango Green) -->
+  <path d="M 12 36 L 24 24 M 24 24 L 14 24 M 24 24 L 24 34" stroke="#73d216" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 12 36 L 24 24 M 24 24 L 14 24 M 24 24 L 24 34" stroke="#4e9a06" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,59 +1,142 @@
 # ScriptCAD: Procedural Solid Modeling & Mesh Art Scripting Workbench for FreeCAD
 
-**ScriptCAD** brings a fluid, procedural scripting workflow and embedded code workspace directly into **FreeCAD's** precision solid-modeling CAD environment.
+[![License: LGPL v2.1](https://img.shields.io/badge/License-LGPL%20v2.1-blue.svg)](LICENSE)
+[![FreeCAD](https://img.shields.io/badge/FreeCAD-0.20%20--%201.1%2B-orange.svg)](https://www.freecad.org)
+[![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org)
+
+**ScriptCAD** brings an intuitive, procedural scripting workflow and embedded live-code workspace directly into FreeCAD's precision solid-modeling CAD environment.
 
 ---
 
 ## Highlights
 
-- **Embedded Scripting Workspace**: A dockable code editor inside FreeCAD featuring dark theme, line numbers, and Python syntax highlighting.
-- **Fast Run Shortcuts**: Run your script anytime with **`Alt+P`** or **`Ctrl+Enter`**.
+- **Native FreeCAD UI & Theming**: Conforms directly to FreeCAD 1.1 UI standards, adapting seamlessly to FreeCAD Dark, Light, and Classic themes.
+- **Top-Bar Aligned Single-Row Toolbar**: High-density, icon-first toolbar ordered from most-used to least-used actions with borderless idle buttons and subtle hover states.
+- **Embedded Scripting Workspace**: A dockable code editor inside FreeCAD with high-contrast line numbers, active line highlighting, cursor coordinates, and theme-adaptive Python syntax highlighting.
 - **⚡ Live Sync Mode**: Tweak dimensions or formulas in code and see your CAD model update automatically as you type.
-- **Fluent & Pythonic CAD Solids**: Avoid verbose OpenCASCADE boilerplate. Create solids, apply transforms, and chain booleans with ease.
-- **Operator-Overloaded CSG**:
+- **Fast Run Shortcuts**: Execute scripts anytime with **`Alt+P`** or **`Ctrl+Enter`**.
+- **Collapsible Console Drawer**: Clean bottom drawer maximized for vertical screen real estate, auto-expanding if errors or exceptions occur (`Ctrl+` ` / `F8`).
+- **FreeCAD Native Tango Icons**: Uses FreeCAD's native Qt resource icons (`:/icons/`) with standalone vector SVG fallbacks.
+- **1-Click Multi-Format Export**: Export your generated model directly to **STEP** (`.step`), **STL** (`.stl`), or **OBJ** (`.obj`).
+- **PartDesign Body Integration**: Automatic or 1-click conversion into active `PartDesign::Body` containers for seamless parametric modeling workflows.
+- **Fluent & Pythonic CAD Solids**: Avoid verbose OpenCASCADE boilerplate. Create solids, apply transforms, and chain booleans with ease:
   - `a - b` : Boolean Cut (Difference)
   - `a + b` : Boolean Union (Fuse)
   - `a & b` : Boolean Intersection (Common)
-- **Mesh Art & Solid Bridge**: Generate algorithmic meshes (math heightfields, noise surfaces, wave planes) and instantly convert them into watertight CAD B-Rep solids with `.to_solid()`.
-- **Integrated Undo/Redo**: Every script execution is wrapped in FreeCAD's native transaction history (press `Ctrl+Z` to undo).
-- **Built-in Presets**: 1-click recipe templates including heatsink radial fins, twisted organic lofts, electronics enclosures, and procedural wave surfaces.
+- **Advanced CAD Operations**:
+  - `.shell(thickness, open_faces="top")` : Native OpenCASCADE hollowing.
+  - `.linear_array(count, step)` : Linear pattern duplication.
+  - `.polar_array(count, total_angle)` : Polar/radial array duplication.
+  - `Sweep(profile, path)` : Sweep 2D profiles along arbitrary 3D B-Spline curves.
+  - `Spring(pitch, height, radius, wire_radius)` / `Helix(...)` : Parametric helical coils.
+  - `Slot(length, width, thickness)` : Mechanical stadium slots.
+  - `Text("Label", size, thickness)` : 3D extruded and embossed text.
+- **Watertight Solid Conversion**: Generate algorithmic meshes (math heightfields, noise surfaces, wave planes) and convert them directly into watertight, 3D-printable B-Rep solids with `.solidify(thickness)`.
+- **Integrated Undo/Redo & Console Logging**: Script executions are wrapped in FreeCAD's native transaction history (`Ctrl+Z`), with logging echoed to FreeCAD's Report View and Python Console.
+- **8 Built-in Presets**: 1-click recipe templates in the GUI dropdown covering CSG, radial arrays, organic lofts, solid waves, shells, sweeps, springs, and 3D text.
 
 ---
 
-## Installation & Setup
+## Prerequisites & Compatibility
 
-ScriptCAD is located at:
-`C:\Users\brian\.gemini\antigravity-ide\scratch\BlendCAD`
+- **FreeCAD**: Version 0.20, 0.21, 1.0, 1.1, or later.
+- **Python**: Python 3.8 or newer (bundled with FreeCAD).
+- **GUI Framework**: PySide2 (Qt5) or PySide6 (Qt6) (bundled with FreeCAD).
+- **External Dependencies**: None. Uses only standard FreeCAD libraries and Python standard modules (`math`, `re`, `time`, `io`).
 
-It is linked directly to your FreeCAD 1.1 installation:
-`%APPDATA%\FreeCAD\v1-1\Mod\ScriptCAD`
+---
 
-### To launch in FreeCAD:
+## Installation
+
+### Method 1: FreeCAD Addon Manager (Recommended)
+1. Open FreeCAD.
+2. Go to **Tools → Addon Manager**.
+3. Select the **Workbenches** tab.
+4. Search for **ScriptCAD** and click **Install**.
+5. Restart FreeCAD when prompted.
+
+### Method 2: Manual Installation (Git Clone)
+Clone the repository directly into your FreeCAD `Mod` directory:
+
+- **Windows**:
+  ```powershell
+  cd "%APPDATA%\FreeCAD\Mod"
+  git clone https://github.com/itskiblu/ScriptCAD.git
+  ```
+
+- **Linux**:
+  ```bash
+  cd ~/.local/share/FreeCAD/Mod
+  git clone https://github.com/itskiblu/ScriptCAD.git
+  ```
+
+- **macOS**:
+  ```bash
+  cd ~/Library/Application\ Support/FreeCAD/Mod
+  git clone https://github.com/itskiblu/ScriptCAD.git
+  ```
+
+---
+
+## Quickstart Guide
+
 1. Start **FreeCAD**.
-2. In the workbench selector dropdown (at the top), choose **ScriptCAD**.
-3. The **ScriptCAD Scripting** panel will dock automatically on the right.
-4. Click **▶ Run (Alt+P)** to generate your first 3D object!
+2. In the workbench selector dropdown, choose **ScriptCAD**.
+3. The **ScriptCAD Scripting** editor will dock automatically on the right side of your 3D view.
+4. Enter your script or pick a template from the **Templates (📜▾)** dropdown.
+5. Click the green **Run (▶)** button or press **`Alt+P`** / **`Ctrl+Enter`** to execute!
 
----
-
-## API Quick Reference
-
-### 1. Primitives
+### Example Script: Parametric CSG Bracket
 ```python
 from scriptcad import *
 
-# Centered or corner-aligned primitives
+# 1. Base solid
+body = Box(length=40, width=40, height=15, center=True)
+
+# 2. Subtract center bore
+bore = Cylinder(r=8, h=25, center=True)
+result = body - bore
+
+# 3. Add 4 corner bolt countersinks
+for x in [-14, 14]:
+    for y in [-14, 14]:
+        hole = Cylinder(r=2.5, h=20, center=True).at(x, y, 0)
+        result -= hole
+
+# 4. Apply edge fillet and display in FreeCAD 3D viewport
+result.fillet(1.0).color(0.2, 0.6, 0.9).show("ParametricMount")
+```
+
+---
+
+## API Reference
+
+### 1. 3D & 2D Primitives
+```python
+from scriptcad import *
+
+# 3D Solids
 box = Box(length=40, width=40, height=10, center=True)
 cube = Cube(size=20, center=True)
 cyl = Cylinder(r=5, h=30, center=True)
 ball = Sphere(r=10)
 cone = Cone(radius1=10, radius2=2, height=20)
 donut = Torus(radius1=25, radius2=5)
+pipe = Pipe(outer_r=10, inner_r=8, height=30)
+wedge = Wedge(10, 10, 10, 0, 0, 10, 10)
+
+# 2D Profiles & Curves
+slot = Slot(length=30, width=10, thickness=4)
+circ = Circle(radius=8, filled=True)
+arc = Arc(radius=10, start_angle=0, end_angle=180)
+ellipse = Ellipse(r1=12, r2=6, filled=True)
+rect = Rectangle(20, 15, center=True)
+path = Spline([(0, 0, 0), (10, 0, 20), (25, 15, 35)])
+label = Text("ScriptCAD", size=10, thickness=2, center=True)
 ```
 
 ### 2. Transforms & Method Chaining
 ```python
-# Transform methods return a new ShapeWrapper for clean chaining:
 part = (
     Box(10, 10, 10)
     .rotate_z(45)
@@ -63,44 +146,48 @@ part = (
 )
 ```
 
-### 3. Clean CSG Booleans
+### 3. Shelling & Array Duplication
 ```python
-base = Box(50, 50, 15, center=True)
-hole = Cylinder(r=10, h=30, center=True)
-post = Cylinder(r=4, h=20, center=True).at(x=15, y=15, z=10)
+# Open-top enclosure with 2mm walls
+enclosure = Box(60, 40, 25, center=True).fillet(2.0).shell(thickness=2.0, open_faces="top")
 
-# Subtract center hole and fuse mounting post:
-result = (base - hole) + post
-result.show("MountPlate")
+# Radial impeller fin pattern
+fins = Box(15, 2, 20, center=True).at(x=12, y=0, z=0).polar_array(count=8)
 ```
 
-### 4. Lofts & Revolutions
+### 4. Sweeps, Springs & Helices
 ```python
-# Organic twisted vase
-p1 = Circle(10).at(z=0)
-p2 = Circle(6).at(z=15)
-p3 = Circle(12).at(z=30)
+path = Spline([(0, 0, 0), (0, 0, 30), (20, 0, 60), (40, 0, 70)])
+tube = Sweep(profile=Circle(radius=5, filled=False), path=path)
 
-vase = Loft([p1, p2, p3], solid=True).color(0.9, 0.4, 0.2)
-vase.show("Vase")
+spring = Spring(pitch=6.0, height=40.0, radius=12.0, wire_radius=1.5)
 ```
 
-### 5. Procedural Mesh Art to CAD Solid
+### 5. Algorithmic Mesh Art to Watertight CAD Solid
 ```python
-# Create an artistic mathematical wave surface
-mesh = MeshArt.ripple_plane(size=80.0, resolution=30, wave_height=5.0, frequency=0.2)
+# Create algorithmic wave heightfield
+mesh = MeshArt.ripple_plane(size=60.0, resolution=25, wave_height=4.0)
 
-# Convert directly to an OpenCASCADE CAD Shell/Solid
-solid = mesh.to_solid(make_solid=False)
-solid.show("AlgorithmicWave", color=(0.1, 0.8, 0.7))
+# Solidify into a watertight, manifold 3D-printable solid block
+solid_wave = mesh.solidify(thickness=6.0)
+
+# Cut mechanical mounting bore with CSG
+final_part = solid_wave - Cylinder(r=5, h=30, center=True)
+final_part.show("SolidWave")
+```
+
+### 6. Multi-Format Export
+```python
+part.export_step("output/part.step")
+part.export_stl("output/part.stl")
+part.export_obj("output/part.obj")
 ```
 
 ---
 
-## Preset Templates Included in GUI
+## License
 
-1. **01 - Welcome: CSG Cutout**: Mounting bracket with countersunk bolt holes and edge fillets.
-2. **02 - Procedural Radial Fins**: Parametric heat sink / turbine rotor with polar array loops.
-3. **03 - Twisted Organic Loft**: Twisted polygonal loft inspired by generative vase design.
-4. **04 - Procedural Wave Surface**: Math-driven ripple surface converted to CAD.
-5. **05 - Parametric Enclosure with Screws**: Hollowed electronic project box with internal screw bosses.
+ScriptCAD is open-source software licensed under the **GNU Lesser General Public License v2.1 or later (LGPL-2.1-or-later)**.
+See the [LICENSE](LICENSE) file for complete terms and conditions.
+
+For release history and version notes, see [CHANGELOG.md](CHANGELOG.md).

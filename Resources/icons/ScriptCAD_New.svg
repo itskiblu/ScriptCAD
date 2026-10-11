@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="paperGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#e2e4e1"/>
+    </linearGradient>
+    <linearGradient id="foldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#babdb6"/>
+      <stop offset="100%" stop-color="#888a85"/>
+    </linearGradient>
+  </defs>
+  <!-- Document base with folded corner -->
+  <path d="M 14 8 L 38 8 L 50 20 L 50 56 L 14 56 Z" fill="url(#paperGrad)" stroke="#555753" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Fold flap -->
+  <path d="M 38 8 L 38 20 L 50 20 Z" fill="url(#foldGrad)" stroke="#555753" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Code lines on paper -->
+  <line x1="22" y1="26" x2="36" y2="26" stroke="#888a85" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="22" y1="34" x2="42" y2="34" stroke="#888a85" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="22" y1="42" x2="38" y2="42" stroke="#888a85" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Plus badge -->
+  <circle cx="46" cy="46" r="10" fill="#73d216" stroke="#4e9a06" stroke-width="2"/>
+  <path d="M 46 41 L 46 51 M 41 46 L 51 46" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
+</svg>

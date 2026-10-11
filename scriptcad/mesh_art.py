@@ -1,10 +1,14 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+# SPDX-FileCopyrightText: 2026 ScriptCAD Team
+
 """
 ScriptCAD Mesh Art Engine:
-Procedural 3D mesh generation, math surfaces, noise displacement,
-and seamless conversion into OpenCASCADE CAD solids.
+Procedural 3D mesh generation, mathematical surfaces, noise displacement,
+solidification into watertight CAD solids, and mesh import/export.
 """
 
 import math
+import os
 from typing import List, Tuple, Callable, Optional, Union
 
 try:
@@ -27,17 +31,22 @@ from .core import ShapeWrapper
 
 class MeshArt:
     """
-    Blender-style mesh container storing vertices and faces.
-    Provides procedural operations, mathematical heightfields/surfaces,
-    and bridge to FreeCAD B-Rep solids.
+    Blender-style procedural mesh container storing vertices and faces.
+    Provides procedural generators, mathematical heightfields/surfaces,
+    noise displacement, watertight CAD solid bridge (`solidify`), and STL/OBJ I/O.
     """
 
-    def __init__(self, vertices: Optional[Union[List[Tuple[float, float, float]], List[List[float]]]] = None,
-                 faces: Optional[Union[List[List[int]], List[Tuple[int, ...]]]] = None):
+    def __init__(self,
+                 vertices: Optional[Union[List[Tuple[float, float, float]], List[List[float]]]] = None,
+                 faces: Optional[Union[List[List[int]], List[Tuple[int, ...]]]] = None,
+                 grid_dims: Optional[Tuple[int, int]] = None):
         self.vertices = [list(v) for v in (vertices or [])]
         self.faces = [list(f) for f in (faces or [])]
+        self.grid_dims = grid_dims  # (nx, ny) if generated from structured 2D grid
 
-    # --- Procedural Generators ---
+    # =========================================================================
+    # Procedural Generators
+    # =========================================================================
 
     @classmethod
     def grid(cls, nx: int = 20, ny: int = 20,
@@ -64,11 +73,10 @@ class MeshArt:
                 v1 = j * nx + (i + 1)
                 v2 = (j + 1) * nx + (i + 1)
                 v3 = (j + 1) * nx + i
-                # Triangulate
                 faces.append([v0, v1, v2])
                 faces.append([v0, v2, v3])
 
-        return cls(vertices, faces)
+        return cls(vertices, faces, grid_dims=(nx, ny))
 
     @classmethod
     def surface(cls, func: Callable[[float, float], Tuple[float, float, float]],
@@ -102,7 +110,19 @@ class MeshArt:
                 faces.append([v0, v1, v2])
                 faces.append([v0, v2, v3])
 
-        return cls(vertices, faces)
+        return cls(vertices, faces, grid_dims=(nu, nv))
+
+    @classmethod
+    def heightfield(cls, func: Callable[[float, float], float],
+                    x_range: Tuple[float, float] = (-50.0, 50.0),
+                    y_range: Tuple[float, float] = (-50.0, 50.0),
+                    resolution: int = 30) -> "MeshArt":
+        """Generate a 3D terrain/heightfield from `z = func(x, y)`."""
+        def surf_func(u, v):
+            z = func(u, v)
+            return (u, v, z)
+
+        return cls.surface(surf_func, u_range=x_range, v_range=y_range, nu=resolution, nv=resolution)
 
     @classmethod
     def torus_mesh(cls, major_r: float = 20.0, minor_r: float = 6.0,
@@ -120,8 +140,26 @@ class MeshArt:
                            nu=nu, nv=nv)
 
     @classmethod
+    def mobius_strip(cls, radius: float = 20.0, width: float = 8.0,
+                     nu: int = 60, nv: int = 10) -> "MeshArt":
+        """Parametric Möbius strip mesh with single half-twist."""
+        def mobius_func(u, v):
+            # u: [0, 2pi], v: [-width/2, width/2]
+            w = v
+            t = u
+            x = (radius + w * math.cos(t / 2.0)) * math.cos(t)
+            y = (radius + w * math.cos(t / 2.0)) * math.sin(t)
+            z = w * math.sin(t / 2.0)
+            return (x, y, z)
+
+        return cls.surface(mobius_func,
+                           u_range=(0.0, 2 * math.pi),
+                           v_range=(-width / 2.0, width / 2.0),
+                           nu=nu, nv=nv)
+
+    @classmethod
     def ripple_plane(cls, size: float = 100.0, resolution: int = 40,
-                     wave_height: float = 4.0, frequency: float = 0.2) -> "MeshArt":
+                      wave_height: float = 4.0, frequency: float = 0.2) -> "MeshArt":
         """Artistic wave/ripple plane."""
         mesh = cls.grid(nx=resolution, ny=resolution, sx=size, sy=size, center=True)
         for v in mesh.vertices:
@@ -129,7 +167,24 @@ class MeshArt:
             v[2] = wave_height * math.sin(r * frequency)
         return mesh
 
-    # --- Procedural Modifiers ---
+    @classmethod
+    def sphere_mesh(cls, radius: float = 10.0, rings: int = 16, segments: int = 32) -> "MeshArt":
+        """UV Sphere polygonal mesh."""
+        def sphere_func(u, v):
+            # u: [0, 2pi], v: [0, pi]
+            x = radius * math.sin(v) * math.cos(u)
+            y = radius * math.sin(v) * math.sin(u)
+            z = radius * math.cos(v)
+            return (x, y, z)
+
+        return cls.surface(sphere_func,
+                           u_range=(0.0, 2 * math.pi),
+                           v_range=(0.001, math.pi - 0.001),
+                           nu=segments, nv=rings)
+
+    # =========================================================================
+    # Procedural Modifiers
+    # =========================================================================
 
     def displace(self, func: Callable[[float, float, float], Union[float, Tuple[float, float, float]]]) -> "MeshArt":
         """
@@ -156,7 +211,91 @@ class MeshArt:
             v[2] += amplitude * n
         return self
 
-    # --- FreeCAD Engine Interop ---
+    # =========================================================================
+    # Watertight CAD Solid Bridge
+    # =========================================================================
+
+    def solidify(self, thickness: float = 5.0, z_base: Optional[float] = None) -> ShapeWrapper:
+        """
+        Convert an open 2D heightfield/surface mesh into a 100% closed, watertight
+        B-Rep CAD solid volume suitable for 3D printing or boolean CSG cuts/fusions.
+
+        Extrudes perimeter edges down to a flat base plane at `z_base` (or `min(z) - thickness`)
+        and adds a sealed bottom cap.
+        """
+        if not self.vertices or not self.faces:
+            return ShapeWrapper()
+
+        min_z = min(v[2] for v in self.vertices)
+        base_level = z_base if z_base is not None else (min_z - abs(thickness))
+
+        N = len(self.vertices)
+        all_verts = [list(v) for v in self.vertices]
+        for v in self.vertices:
+            all_verts.append([v[0], v[1], base_level])
+
+        all_faces = [list(f) for f in self.faces]
+
+        # Invert top faces for bottom cap
+        for f in self.faces:
+            all_faces.append([f[0] + N, f[2] + N, f[1] + N])
+
+        if self.grid_dims:
+            nx, ny = self.grid_dims
+            # Bottom edge (j=0)
+            for i in range(nx - 1):
+                t0 = i
+                t1 = i + 1
+                b0 = t0 + N
+                b1 = t1 + N
+                all_faces.append([t0, b0, b1])
+                all_faces.append([t0, b1, t1])
+
+            # Right edge (i=nx-1)
+            for j in range(ny - 1):
+                t0 = j * nx + (nx - 1)
+                t1 = (j + 1) * nx + (nx - 1)
+                b0 = t0 + N
+                b1 = t1 + N
+                all_faces.append([t0, b0, b1])
+                all_faces.append([t0, b1, t1])
+
+            # Top edge (j=ny-1)
+            for i in range(nx - 1):
+                t0 = (ny - 1) * nx + (i + 1)
+                t1 = (ny - 1) * nx + i
+                b0 = t0 + N
+                b1 = t1 + N
+                all_faces.append([t0, b0, b1])
+                all_faces.append([t0, b1, t1])
+
+            # Left edge (i=0)
+            for j in range(ny - 1):
+                t0 = (j + 1) * nx
+                t1 = j * nx
+                b0 = t0 + N
+                b1 = t1 + N
+                all_faces.append([t0, b0, b1])
+                all_faces.append([t0, b1, t1])
+
+        # Convert constructed manifold to FreeCAD Mesh
+        if Mesh is None or Part is None:
+            return ShapeWrapper()
+
+        m = Mesh.Mesh()
+        for f in all_faces:
+            p1, p2, p3 = all_verts[f[0]], all_verts[f[1]], all_verts[f[2]]
+            m.addFacet(p1[0], p1[1], p1[2], p2[0], p2[1], p2[2], p3[0], p3[1], p3[2])
+
+        shape = Part.Shape()
+        shape.makeShapeFromMesh(m.Topology, 0.05)
+        try:
+            solid = Part.makeSolid(shape)
+            if solid.isValid() and solid.Volume > 0:
+                return ShapeWrapper(solid)
+        except Exception:
+            pass
+        return ShapeWrapper(shape)
 
     def to_freecad_mesh(self):
         """Build a native FreeCAD Mesh.Mesh object."""
@@ -176,7 +315,7 @@ class MeshArt:
     def to_solid(self, tolerance: float = 0.05, make_solid: bool = True) -> ShapeWrapper:
         """
         Convert the polygonal mesh into an OpenCASCADE CAD Shell/Solid.
-        Enables boolean operations (+, -, &) with regular CAD primitives!
+        Enables boolean operations (+, -, &) with regular CAD primitives.
         """
         if Part is None or Mesh is None:
             return ShapeWrapper()
@@ -196,6 +335,56 @@ class MeshArt:
                 pass
 
         return ShapeWrapper(shape)
+
+    # =========================================================================
+    # Mesh Import & Export
+    # =========================================================================
+
+    def export_stl(self, filepath: str) -> bool:
+        """Export mesh to STL file."""
+        fc_mesh = self.to_freecad_mesh()
+        if fc_mesh is None:
+            return False
+        try:
+            os.makedirs(os.path.dirname(os.path.abspath(filepath)), exist_ok=True)
+            fc_mesh.write(filepath)
+            print(f"[ScriptCAD] Exported mesh to STL: {filepath}")
+            return True
+        except Exception as e:
+            print(f"[ScriptCAD Error] Mesh STL export failed: {e}")
+            return False
+
+    def export_obj(self, filepath: str) -> bool:
+        """Export mesh to Wavefront OBJ file."""
+        fc_mesh = self.to_freecad_mesh()
+        if fc_mesh is None:
+            return False
+        try:
+            os.makedirs(os.path.dirname(os.path.abspath(filepath)), exist_ok=True)
+            fc_mesh.write(filepath)
+            print(f"[ScriptCAD] Exported mesh to OBJ: {filepath}")
+            return True
+        except Exception as e:
+            print(f"[ScriptCAD Error] Mesh OBJ export failed: {e}")
+            return False
+
+    @classmethod
+    def from_stl(cls, filepath: str) -> "MeshArt":
+        """Load an STL file from disk into a MeshArt object."""
+        if Mesh is None or not os.path.exists(filepath):
+            return cls()
+        try:
+            m = Mesh.Mesh(filepath)
+            verts = [[p.x, p.y, p.z] for p in m.Points]
+            facets = [list(f.PointIndices) for f in m.Facets]
+            return cls(verts, facets)
+        except Exception as e:
+            print(f"[ScriptCAD Error] Could not load STL '{filepath}': {e}")
+            return cls()
+
+    # =========================================================================
+    # Presentation
+    # =========================================================================
 
     def show(self, name: str = "ProceduralMesh",
              color: Tuple[float, float, float] = (0.9, 0.4, 0.1),

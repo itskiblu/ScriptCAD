@@ -1,28 +1,35 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
   <defs>
-    <linearGradient id="scriptCyan" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#00e5ff"/>
-      <stop offset="100%" stop-color="#0091ea"/>
+    <linearGradient id="wbTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9ac0cd"/>
+      <stop offset="100%" stop-color="#729fcf"/>
     </linearGradient>
-    <linearGradient id="cadBlue" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#4fc3f7"/>
-      <stop offset="100%" stop-color="#0288d1"/>
+    <linearGradient id="wbLeft" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3465a4"/>
+      <stop offset="100%" stop-color="#204a87"/>
     </linearGradient>
-    <linearGradient id="codeOrange" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ffab40"/>
-      <stop offset="100%" stop-color="#ff6d00"/>
+    <linearGradient id="wbRight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4f7fb8"/>
+      <stop offset="100%" stop-color="#2c5380"/>
+    </linearGradient>
+    <linearGradient id="badgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fcaf3e"/>
+      <stop offset="100%" stop-color="#f57900"/>
     </linearGradient>
   </defs>
-  <!-- Background Rounded Rect -->
-  <rect x="4" y="4" width="56" height="56" rx="12" fill="#1e1e24" stroke="#2c2c34" stroke-width="2"/>
-  
-  <!-- CAD Isometric Cube (Precision Blue) -->
-  <path d="M 32 12 L 48 21 L 32 30 L 16 21 Z" fill="#38bdf8"/>
-  <path d="M 16 21 L 32 30 L 32 48 L 16 39 Z" fill="#0284c7"/>
-  <path d="M 32 30 L 48 21 L 48 39 L 32 48 Z" fill="#0369a1"/>
-  
-  <!-- Script / Code Badge (Glowing Accent) -->
-  <circle cx="44" cy="44" r="11" fill="url(#codeOrange)" stroke="#1e1e24" stroke-width="2"/>
-  <!-- Code Brackets inside badge: < > -->
-  <path d="M 40 40 L 37 44 L 40 48 M 48 40 L 51 44 L 48 48" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- 3D Isometric CAD Cube -->
+  <!-- Top Face -->
+  <polygon points="32,7 54,20 32,33 10,20" fill="url(#wbTop)" stroke="#204a87" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Left Face -->
+  <polygon points="10,20 32,33 32,56 10,43" fill="url(#wbLeft)" stroke="#204a87" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Right Face -->
+  <polygon points="32,33 54,20 54,43 32,56" fill="url(#wbRight)" stroke="#204a87" stroke-width="2" stroke-linejoin="round"/>
+
+  <!-- Procedural Script Badge: Orange circular badge with Python script glyphs -->
+  <circle cx="45" cy="45" r="14" fill="url(#badgeGrad)" stroke="#ce5c00" stroke-width="2.2"/>
+  <!-- Terminal Prompt / Brackets: </ > inside badge -->
+  <path d="M 39 40 L 35 45 L 39 50" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M 51 40 L 55 45 L 51 50" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <line x1="47" y1="39" x2="43" y2="51" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
 </svg>

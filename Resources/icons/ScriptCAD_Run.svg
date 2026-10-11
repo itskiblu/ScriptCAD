@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="runGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8ae234"/>
+      <stop offset="100%" stop-color="#73d216"/>
+    </linearGradient>
+  </defs>
+  <!-- FreeCAD Tango Execution Play Arrow -->
+  <polygon points="14,10 54,32 14,54" fill="url(#runGrad)" stroke="#4e9a06" stroke-width="3" stroke-linejoin="round"/>
+  <!-- Highlight inner edge -->
+  <polygon points="17,15 48,32 17,49" fill="none" stroke="#b4f469" stroke-width="1.5" stroke-linejoin="round" opacity="0.6"/>
+</svg>

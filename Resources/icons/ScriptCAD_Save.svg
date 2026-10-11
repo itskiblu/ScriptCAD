@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="diskGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f7fb8"/>
+      <stop offset="100%" stop-color="#3465a4"/>
+    </linearGradient>
+  </defs>
+  <!-- Floppy disk casing -->
+  <path d="M 10 10 L 46 10 L 54 18 L 54 54 L 10 54 Z" fill="url(#diskGrad)" stroke="#204a87" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- Top metal slider -->
+  <rect x="20" y="10" width="24" height="18" fill="#d3d7cf" stroke="#888a85" stroke-width="1.8"/>
+  <rect x="25" y="14" width="6" height="10" fill="#3465a4"/>
+  <!-- Bottom paper label -->
+  <rect x="18" y="32" width="28" height="22" rx="2" fill="#eeeeec" stroke="#babdb6" stroke-width="1.5"/>
+  <line x1="22" y1="38" x2="42" y2="38" stroke="#3465a4" stroke-width="2" stroke-linecap="round"/>
+  <line x1="22" y1="44" x2="38" y2="44" stroke="#888a85" stroke-width="1.8" stroke-linecap="round"/>
+</svg>

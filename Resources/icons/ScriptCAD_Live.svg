@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="liveGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff066"/>
+      <stop offset="100%" stop-color="#edd400"/>
+    </linearGradient>
+  </defs>
+  <!-- Dynamic Lightning Bolt for Live Sync -->
+  <polygon points="36,6 14,34 32,34 26,58 50,28 32,28" fill="url(#liveGrad)" stroke="#c4a000" stroke-width="2.5" stroke-linejoin="round"/>
+</svg>

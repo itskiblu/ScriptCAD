@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="folderBack" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f57900"/>
+      <stop offset="100%" stop-color="#ce5c00"/>
+    </linearGradient>
+    <linearGradient id="folderFront" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fcaf3e"/>
+      <stop offset="100%" stop-color="#f57900"/>
+    </linearGradient>
+  </defs>
+  <!-- Back Folder Plate with Tab -->
+  <path d="M 8 16 L 24 16 L 30 22 L 54 22 L 54 48 L 8 48 Z" fill="url(#folderBack)" stroke="#ce5c00" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Paper inside folder -->
+  <polygon points="18,14 46,14 44,30 16,30" fill="#ffffff" stroke="#babdb6" stroke-width="1.5"/>
+  <!-- Front Folder Flap (Angled Open) -->
+  <path d="M 6 48 L 14 26 L 58 26 L 50 48 Z" fill="url(#folderFront)" stroke="#ce5c00" stroke-width="2.2" stroke-linejoin="round"/>
+</svg>

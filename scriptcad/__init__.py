@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: LGPL-2.1-or-later
+# SPDX-FileCopyrightText: 2026 ScriptCAD Team
+
 """
 ScriptCAD: Procedural Solid Modeling & Mesh Art Scripting Engine for FreeCAD.
 """
@@ -10,10 +13,20 @@ except ImportError:
     App = None
     Vector = None
 
-from .core import ShapeWrapper, set_partdesign_mode, convert_to_body
+from .core import (
+    ShapeWrapper,
+    set_partdesign_mode,
+    convert_to_body,
+    union,
+    difference,
+    intersection,
+    import_step,
+    import_brep
+)
 from .primitives import (
-    Box, Cube, Cylinder, Sphere, Cone, Torus,
-    Plane, Circle, Polygon, Loft, Extrude, Revolve
+    Box, Cube, Cylinder, Sphere, Cone, Torus, Wedge, Pipe, Tube,
+    Plane, Rectangle, Circle, Arc, Ellipse, Polygon, Spline, Slot, Text,
+    Loft, Extrude, Revolve, Sweep, Helix, Spring, HelixSolid
 )
 from .mesh_art import MeshArt
 
@@ -50,8 +63,11 @@ __all__ = [
     "ShapeWrapper",
     "set_partdesign_mode",
     "convert_to_body",
-    "Box", "Cube", "Cylinder", "Sphere", "Cone", "Torus",
-    "Plane", "Circle", "Polygon", "Loft", "Extrude", "Revolve",
+    "union", "difference", "intersection",
+    "import_step", "import_brep",
+    "Box", "Cube", "Cylinder", "Sphere", "Cone", "Torus", "Wedge", "Pipe", "Tube",
+    "Plane", "Rectangle", "Circle", "Arc", "Ellipse", "Polygon", "Spline", "Slot", "Text",
+    "Loft", "Extrude", "Revolve", "Sweep", "Helix", "Spring", "HelixSolid",
     "MeshArt",
     "clear_document",
     "active_document",

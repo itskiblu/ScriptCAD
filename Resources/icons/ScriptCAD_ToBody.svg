@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="bodyTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9ac0cd"/>
+      <stop offset="100%" stop-color="#729fcf"/>
+    </linearGradient>
+    <linearGradient id="bodyLeft" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3465a4"/>
+      <stop offset="100%" stop-color="#204a87"/>
+    </linearGradient>
+    <linearGradient id="bodyRight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4f7fb8"/>
+      <stop offset="100%" stop-color="#2c5380"/>
+    </linearGradient>
+  </defs>
+
+  <!-- PartDesign Local Coordinate System Origin (Yellow Axes) -->
+  <line x1="16" y1="46" x2="16" y2="16" stroke="#edd400" stroke-width="3" stroke-linecap="round"/>
+  <line x1="16" y1="46" x2="48" y2="46" stroke="#edd400" stroke-width="3" stroke-linecap="round"/>
+  <line x1="16" y1="46" x2="6" y2="56" stroke="#edd400" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Solid Feature Box inside Body -->
+  <polygon points="36,16 54,26 36,36 18,26" fill="url(#bodyTop)" stroke="#204a87" stroke-width="2" stroke-linejoin="round"/>
+  <polygon points="18,26 36,36 36,52 18,42" fill="url(#bodyLeft)" stroke="#204a87" stroke-width="2" stroke-linejoin="round"/>
+  <polygon points="36,36 54,26 54,42 36,52" fill="url(#bodyRight)" stroke="#204a87" stroke-width="2" stroke-linejoin="round"/>
+
+  <!-- Active Indicator: Small green check/tip at corner -->
+  <circle cx="50" cy="14" r="8" fill="#73d216" stroke="#4e9a06" stroke-width="2"/>
+  <path d="M 46 14 L 49 17 L 55 11" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="termGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2e3436"/>
+      <stop offset="100%" stop-color="#1e1e1e"/>
+    </linearGradient>
+  </defs>
+  <!-- Terminal window base -->
+  <rect x="8" y="10" width="48" height="44" rx="4" fill="url(#termGrad)" stroke="#555753" stroke-width="2.5"/>
+  <!-- Top header bar of terminal -->
+  <rect x="8" y="10" width="48" height="12" rx="4" fill="#555753"/>
+  <circle cx="16" cy="16" r="2.5" fill="#ef2929"/>
+  <circle cx="23" cy="16" r="2.5" fill="#fce94f"/>
+  <circle cx="30" cy="16" r="2.5" fill="#8ae234"/>
+  <!-- Command prompt glyphs: >_ -->
+  <path d="M 16 30 L 24 36 L 16 42" stroke="#8ae234" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <line x1="28" y1="42" x2="38" y2="42" stroke="#eeeeec" stroke-width="3" stroke-linecap="round"/>
+</svg>
