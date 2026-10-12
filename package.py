@@ -30,6 +30,8 @@ INCLUDE_ITEMS = [
     "LICENSE",
     "README.md",
     "CHANGELOG.md",
+    "llms.txt",
+    "AGENTS.md",
     "install.py",
     "Resources",
     "gui",

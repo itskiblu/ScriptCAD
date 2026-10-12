@@ -1,0 +1,200 @@
+# ScriptCAD
+
+> Procedural Solid Modeling & Mesh Art Scripting Engine for FreeCAD.
+
+ScriptCAD provides a high-level, fluent Python modeling API built directly on FreeCAD's OpenCASCADE geometric modeling kernel. It replaces verbose FreeCAD Python boilerplate with operator-overloaded CSG, method-chained spatial transforms, algorithmic mesh-to-solid conversion, and 1-line FreeCAD viewport rendering.
+
+## Quick Reference for LLMs / AI Agents
+
+When generating Python scripts for ScriptCAD, follow these mandatory rules:
+
+### 1. Header & Import
+Always import ScriptCAD at the top:
+```python
+from scriptcad import *
+```
+Standard libraries like `math` can be imported as needed.
+
+### 2. Viewport Output Rule (CRITICAL)
+Every script MUST conclude by displaying the final part(s) using `.show("ObjectName")`:
+```python
+result.color(0.2, 0.6, 0.9).show("FinalPart")
+```
+Creating a shape in memory (`part = Box(...)`) will NOT render in FreeCAD unless `.show()` is called. By default, `.show()` creates an active `PartDesign::Body` container in the FreeCAD tree.
+
+### 3. CSG Booleans via Operator Overloading
+Use native Python operators on `ShapeWrapper` objects:
+- **Cut / Difference**: `a - b` or `a -= b`
+- **Fuse / Union**: `a + b` or `a += b`
+- **Common / Intersection**: `a & b` or `a &= b`
+
+### 4. Transforms via Fluent Method Chaining
+Never construct `App.Placement` or mutate FreeCAD properties directly. Chain transform methods on the shapes:
+- `.at(x, y, z)` or `.translate(x, y, z)`
+- `.rotate_x(deg)`, `.rotate_y(deg)`, `.rotate_z(deg)`
+- `.rotate(axis=(0, 0, 1), angle=deg, center=(0, 0, 0))`
+- `.scale(factor, center=(0, 0, 0))`
+- `.mirror("XY" | "XZ" | "YZ")`
+- `.fillet(radius)` / `.chamfer(distance)`
+- `.shell(thickness, open_faces="top" | "bottom" | "front" | "back" | "left" | "right" | "none")`
+- `.linear_array(count, step=(dx, dy, dz), union=True)`
+- `.polar_array(count, total_angle=360.0, axis=(0, 0, 1), union=True)`
+
+### 5. Units & Coordinates
+- **Units**: Millimeters (`mm`).
+- **Angles**: Degrees (`°`).
+- **Axes**: Right-handed Z-up (`X` = Right, `Y` = Depth/Back, `Z` = Height).
+
+### 6. Negative Constraints (What NOT to do)
+- ❌ Do NOT use raw FreeCAD OCC code: `Part.makeBox()`, `Part.makeCylinder()`, `doc.addObject("Part::Feature")`.
+- ❌ Do NOT use `App.Placement(App.Vector(...), App.Rotation(...))`.
+- ❌ Do NOT generate CadQuery (`cq.Workplane`) or OpenSCAD code.
+- ❌ Do NOT call `Part.show()` — use `shape.show("Name")`.
+
+---
+
+## API Specification
+
+### 3D Solid Primitives
+- `Box(length=10.0, width=10.0, height=10.0, center=False)`: Rectangular box.
+- `Cube(size=10.0, center=False)`: Uniform cube shortcut.
+- `Cylinder(radius=5.0, height=10.0, r=None, h=None, center=False)`: Solid cylinder.
+- `Sphere(radius=5.0, r=None)`: Solid sphere centered at origin.
+- `Cone(radius1=5.0, radius2=0.0, height=10.0, center=False)`: Solid cone or frustum.
+- `Torus(radius1=10.0, radius2=2.0)`: Donut (major radius, minor radius).
+- `Pipe(outer_r=10.0, inner_r=8.0, height=20.0, center=False)` / `Tube(...)`: Hollow cylinder.
+- `Wedge(dx, dy, dz, xmin, zmin, xmax, zmax)`: 3D wedge.
+- `Spring(pitch=5.0, height=25.0, radius=10.0, wire_radius=1.0)` / `HelixSolid(...)`: Solid helical coil.
+
+### 2D Profiles & Curves
+- `Circle(radius=5.0, filled=True)`: Circular planar face or wire.
+- `Plane(length=10.0, width=10.0, center=False)`: Flat rectangular face on XY.
+- `Rectangle(length, width, center=False, filled=True)`: 2D rectangular profile.
+- `Polygon([(x, y, z), ...], filled=True)`: Closed planar polygonal face.
+- `Spline([(x, y, z), ...], closed=False, filled=False)`: Smooth 3D B-Spline curve.
+- `Arc(radius=5.0, start_angle=0.0, end_angle=180.0, center=(0, 0, 0))`: Circular arc wire.
+- `Ellipse(r1=10.0, r2=5.0, center=True, filled=True)`: Elliptical planar face.
+- `Slot(length=20.0, width=8.0, thickness=0.0, center=True)`: Mechanical stadium slot (solid if `thickness > 0`).
+- `Text(text="CAD", size=10.0, thickness=2.0, center=False)`: 3D embossed/extruded text.
+- `Helix(pitch=5.0, height=20.0, radius=10.0, angle=0.0)`: 3D helical guide path wire.
+
+### 3D Operations from 2D Profiles
+- `Sweep(profile, path, solid=True, frenet=True)`: Sweep a 2D profile wire/face along a 3D guide wire/spline.
+- `Loft(profiles=[...], solid=True, ruled=False)`: Transition between a sequence of cross-section wires/faces.
+- `Extrude(profile, distance=10.0, direction=(0, 0, 1))` (or `profile.extrude(distance, direction)`).
+- `Revolve(profile, axis=(0, 0, 1), angle=360.0, center=(0, 0, 0))` (or `profile.revolve(...)`).
+
+### Procedural Mesh Art (`MeshArt`)
+Algorithmic surface generator with 1-click watertight B-Rep CAD solid conversion:
+- `MeshArt.grid(nx=20, ny=20, sx=100.0, sy=100.0, center=True)`
+- `MeshArt.surface(func, u_range=(0, 1), v_range=(0, 1), nu=30, nv=30)`: `func(u, v) -> (x, y, z)`.
+- `MeshArt.heightfield(func, x_range=(-50, 50), y_range=(-50, 50), resolution=30)`: `func(x, y) -> z`.
+- `MeshArt.ripple_plane(size=100.0, resolution=40, wave_height=4.0, frequency=0.2)`
+- `MeshArt.torus_mesh(major_r=20.0, minor_r=6.0, nu=32, nv=16)`
+- `MeshArt.mobius_strip(radius=20.0, width=8.0, nu=60, nv=10)`
+- `mesh.displace(func)`: Modify vertex coordinates.
+- `mesh.noise(amplitude=3.0, freq=0.1)`: Procedural multi-harmonic sinusoidal noise.
+- `mesh.solidify(thickness=5.0, z_base=None)`: **Converts mesh into a 100% closed, watertight, 3D-printable B-Rep solid** ready for CSG booleans (`-`, `+`, `&`).
+
+### Multi-Format Export
+- `shape.export_step("path/to/part.step")`
+- `shape.export_stl("path/to/part.stl")`
+- `shape.export_obj("path/to/part.obj")`
+
+---
+
+## Canonical Script Examples
+
+### Example 1: Parametric CSG Bracket
+```python
+from scriptcad import *
+
+# 1. Base block with rounded corners
+body = Box(length=60, width=40, height=14, center=True).fillet(2.0)
+
+# 2. Subtract center bore
+bore = Cylinder(r=10, h=25, center=True)
+result = body - bore
+
+# 3. Add 4 corner bolt holes
+for x in [-22, 22]:
+    for y in [-13, 13]:
+        hole = Cylinder(r=2.5, h=20, center=True).at(x, y, 0)
+        result -= hole
+
+# 4. Display in FreeCAD viewport
+result.color(0.2, 0.6, 0.9).show("ParametricBracket")
+```
+
+### Example 2: Radial Array Turbofan Rotor
+```python
+from scriptcad import *
+
+# 1. Central shaft hub
+hub = Cylinder(r=14, h=25, center=True)
+shaft_hole = Cylinder(r=5, h=30, center=True)
+core = hub - shaft_hole
+
+# 2. Single aerofoil blade with polar array duplication
+blade = Box(length=24, width=2.5, height=22, center=True).at(x=20, y=0, z=0)
+blades = blade.polar_array(count=12, total_angle=360.0)
+
+# 3. Fuse assembly and render
+assembly = core + blades
+assembly.color(0.85, 0.85, 0.9).show("TurbofanRotor")
+```
+
+### Example 3: Shelled Enclosure with Screw Bosses
+```python
+from scriptcad import *
+
+# 1. Solid outer box with rounded corners
+outer = Box(length=80, width=50, height=25, center=True).fillet(3.0)
+
+# 2. Shell out interior, keeping top face open
+case = outer.shell(thickness=2.0, open_faces="top")
+
+# 3. Add internal corner mounting bosses with pilot holes
+for x in [-32, 32]:
+    for y in [-18, 18]:
+        boss = Cylinder(r=3.5, h=18, center=True).at(x, y, -2.5)
+        pilot = Cylinder(r=1.5, h=22, center=True).at(x, y, -2.5)
+        case = (case + boss) - pilot
+
+case.color(0.3, 0.35, 0.4).show("ElectronicsEnclosure")
+```
+
+### Example 4: Swept Curved Pipe & Mounting Flange
+```python
+from scriptcad import *
+
+# 1. 3D B-Spline guide curve
+path = Spline([(0, 0, 0), (0, 0, 30), (20, 0, 50), (60, 20, 60)])
+
+# 2. Sweep outer and inner profiles
+outer = Sweep(profile=Circle(6.0), path=path)
+inner = Sweep(profile=Circle(4.5), path=path)
+pipe = outer - inner
+
+# 3. Circular base mounting flange
+flange = Cylinder(r=16.0, h=4.0) - Cylinder(r=4.5, h=10.0)
+for a in [0, 90, 180, 270]:
+    flange -= Cylinder(r=2.0, h=10.0).at(x=11, y=0, z=0).rotate_z(a)
+
+(pipe + flange).color(0.8, 0.5, 0.2).show("SweptPipeAssembly")
+```
+
+### Example 5: Algorithmic Wave Heightfield Solid
+```python
+from scriptcad import *
+
+# 1. Generate procedural mathematical wave surface
+mesh = MeshArt.ripple_plane(size=60.0, resolution=25, wave_height=4.0)
+
+# 2. Solidify into watertight manifold solid block
+solid_wave = mesh.solidify(thickness=6.0)
+
+# 3. Cut center mounting bore
+part = solid_wave - Cylinder(r=6.0, h=30.0, center=True)
+part.color(0.15, 0.75, 0.7).show("WaveTile")
+```

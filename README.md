@@ -224,6 +224,24 @@ part.export_obj("output/part.obj")
 
 ---
 
+## AI & LLM Script Generation
+
+ScriptCAD includes a dedicated machine-readable specification conforming to the [`llms.txt`](https://llmstxt.org/) standard at [`llms.txt`](llms.txt) (or [`AGENTS.md`](AGENTS.md)).
+
+When asking an AI assistant (such as ChatGPT, Claude, Gemini, Cursor, or Copilot) to generate 3D models for ScriptCAD, instruct it with:
+
+> *"Write a ScriptCAD Python script for [your part description]. Look up the ScriptCAD API specification at https://raw.githubusercontent.com/itskiblu/ScriptCAD/main/llms.txt before writing the code."*
+
+### Key Prompt Rules for LLMs:
+- **Always import**: `from scriptcad import *`
+- **Render to Viewport**: Every script must conclude with `.show("ObjectName")` (e.g. `part.color(0.2, 0.6, 0.9).show("MyPart")`).
+- **CSG Booleans**: Use Python operators (`a - b` for cut, `a + b` for fuse, `a & b` for common).
+- **Transforms**: Use chained methods (`.at(x, y, z)`, `.rotate_z(deg)`, `.fillet(r)`, `.shell(t)`).
+- **Units**: Millimeters (`mm`) and degrees (`°`).
+- **No FreeCAD OCC Boilerplate**: Do not use `Part.makeBox()`, `App.Placement()`, or `doc.addObject()`.
+
+---
+
 ## License
 
 ScriptCAD is open-source software licensed under the **GNU Lesser General Public License v2.1 or later (LGPL-2.1-or-later)**.
