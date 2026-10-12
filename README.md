@@ -34,7 +34,8 @@
   - `Text("Label", size, thickness)` : 3D extruded and embossed text.
 - **Watertight Solid Conversion**: Generate algorithmic meshes (math heightfields, noise surfaces, wave planes) and convert them directly into watertight, 3D-printable B-Rep solids with `.solidify(thickness)`.
 - **Integrated Undo/Redo & Console Logging**: Script executions are wrapped in FreeCAD's native transaction history (`Ctrl+Z`), with logging echoed to FreeCAD's Report View and Python Console.
-- **8 Built-in Presets**: 1-click recipe templates in the GUI dropdown covering CSG, radial arrays, organic lofts, solid waves, shells, sweeps, springs, and 3D text.
+- **⚡ Native OpenSCAD Support & Transpiler**: Run standard OpenSCAD scripts (`.scad`) directly inside FreeCAD with auto-detection on execution (**`Alt+P`**), or convert them 1-click into clean procedural ScriptCAD Python code (**`Ctrl+Shift+O`**). Zero external dependencies required.
+- **10 Built-in Presets**: 1-click recipe templates in the GUI dropdown covering CSG, radial arrays, organic lofts, solid waves, shells, sweeps, springs, 3D text, and native OpenSCAD models.
 
 ---
 
@@ -220,6 +221,35 @@ final_part.show("SolidWave")
 part.export_step("output/part.step")
 part.export_stl("output/part.stl")
 part.export_obj("output/part.obj")
+```
+
+### 7. Native OpenSCAD Scripting Support
+You can paste or open OpenSCAD scripts (`.scad`) directly in the ScriptCAD editor. ScriptCAD automatically detects OpenSCAD syntax when you run (**`Alt+P`**), or you can convert it to Python with 1 click (**`Ctrl+Shift+O`**):
+
+```openscad
+// OpenSCAD Parametric Mounting Bracket
+width = 60;
+height = 14;
+
+difference() {
+    cube([width, 40, height], center=true);
+    cylinder(r=10, h=height + 4, center=true);
+    for (x = [-22, 22], y = [-13, 13]) {
+        translate([x, y, 0])
+            cylinder(r=2.5, h=height + 2, center=true);
+    }
+}
+```
+
+You can also transpile or run OpenSCAD programmatically in Python:
+```python
+import scriptcad
+
+# Transpile OpenSCAD to ScriptCAD Python
+py_code = scriptcad.transpile_openscad(scad_source)
+
+# Run OpenSCAD code directly into FreeCAD document
+part = scriptcad.run_openscad("model.scad")
 ```
 
 ---

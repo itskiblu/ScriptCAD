@@ -79,7 +79,7 @@ class PythonHighlighter(QSyntaxHighlighter):
         num_fmt.setForeground(c_num)
         add_rule(r"\b[0-9]+(\.[0-9]+)?([eE][+-]?[0-9]+)?\b", num_fmt)
 
-        # 3. Python Keywords
+        # 3. Python & OpenSCAD Keywords
         kw_fmt = QTextCharFormat()
         kw_fmt.setForeground(c_kw)
         kw_fmt.setFontWeight(QFont.Bold)
@@ -88,7 +88,8 @@ class PythonHighlighter(QSyntaxHighlighter):
             "del", "elif", "else", "except", "finally", "for",
             "from", "global", "if", "import", "in", "is", "lambda",
             "nonlocal", "not", "or", "pass", "raise", "return",
-            "try", "while", "with", "yield", "async", "await"
+            "try", "while", "with", "yield", "async", "await",
+            "module", "function", "include", "use"
         ]
         for kw in keywords:
             add_rule(r"\b" + kw + r"\b", kw_fmt)
@@ -97,7 +98,7 @@ class PythonHighlighter(QSyntaxHighlighter):
         const_fmt = QTextCharFormat()
         const_fmt.setForeground(c_const)
         const_fmt.setFontWeight(QFont.Bold)
-        for const in ["True", "False", "None"]:
+        for const in ["True", "False", "None", "true", "false", "undef", "PI"]:
             add_rule(r"\b" + const + r"\b", const_fmt)
 
         # 5. Builtin Functions
@@ -111,7 +112,7 @@ class PythonHighlighter(QSyntaxHighlighter):
         for b in builtins:
             add_rule(r"\b" + b + r"\b", builtin_fmt)
 
-        # 6. ScriptCAD Primitives & 3D Solids (Distinctive Mint Turquoise)
+        # 6. ScriptCAD & OpenSCAD Primitives & Transforms (Mint Turquoise)
         cad_fmt = QTextCharFormat()
         cad_fmt.setForeground(c_cad)
         cad_fmt.setFontWeight(QFont.Bold)
@@ -121,16 +122,21 @@ class PythonHighlighter(QSyntaxHighlighter):
             "Polygon", "Spline", "Slot", "Text", "Pipe", "Tube", "Loft", "Extrude",
             "Revolve", "Sweep", "Helix", "Spring", "HelixSolid", "MeshArt",
             "clear_document", "active_document", "convert_to_body",
-            "decompile", "ModelDecompiler", "get_document_models"
+            "decompile", "ModelDecompiler", "get_document_models",
+            "cube", "cylinder", "sphere", "square", "circle", "polygon", "polyhedron",
+            "difference", "union", "intersection", "hull", "minkowski",
+            "translate", "rotate", "scale", "mirror", "linear_extrude", "rotate_extrude",
+            "offset", "color", "transpile_openscad", "run_openscad"
         ]
         for sym in cad_symbols:
             add_rule(r"\b" + sym + r"\b", cad_fmt)
 
-        # 7. Function and Class Declarations
+        # 7. Function, Class & Module Declarations
         fn_fmt = QTextCharFormat()
         fn_fmt.setForeground(c_fn)
         fn_fmt.setFontWeight(QFont.Bold)
         add_rule(r"\bdef\s+([A-Za-z_][A-Za-z0-9_]*)", fn_fmt, 1)
+        add_rule(r"\bmodule\s+([A-Za-z_][A-Za-z0-9_]*)", fn_fmt, 1)
         add_rule(r"\bclass\s+([A-Za-z_][A-Za-z0-9_]*)", cad_fmt, 1)
 
         # 8. Chained Method Calls (.fillet(), .color(), .show(), .at(), etc.)
@@ -144,8 +150,9 @@ class PythonHighlighter(QSyntaxHighlighter):
         add_rule(r'"[^"\\]*(\\.[^"\\]*)*"', self.str_fmt)
         add_rule(r"'[^'\\]*(\\.[^'\\]*)*'", self.str_fmt)
 
-        # 10. Comments (Top precedence for single lines)
+        # 10. Comments (Python # and OpenSCAD //)
         add_rule(r"#[^\n]*", self.comment_fmt)
+        add_rule(r"//[^\n]*", self.comment_fmt)
 
     def highlightBlock(self, text):
         # Apply registered rules in sequence

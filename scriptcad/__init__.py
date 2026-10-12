@@ -30,6 +30,12 @@ from .primitives import (
 )
 from .mesh_art import MeshArt
 from .decompiler import decompile, ModelDecompiler, get_document_models
+from .openscad import (
+    is_openscad_code,
+    transpile_openscad,
+    run_openscad,
+    find_openscad_executable
+)
 
 
 def clear_document(doc=None):
@@ -71,6 +77,7 @@ __all__ = [
     "Loft", "Extrude", "Revolve", "Sweep", "Helix", "Spring", "HelixSolid",
     "MeshArt",
     "decompile", "ModelDecompiler", "get_document_models",
+    "is_openscad_code", "transpile_openscad", "run_openscad", "find_openscad_executable",
     "clear_document",
     "active_document",
     "Vector",

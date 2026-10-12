@@ -48,8 +48,14 @@ Never construct `App.Placement` or mutate FreeCAD properties directly. Chain tra
 ### 6. Negative Constraints (What NOT to do)
 - ❌ Do NOT use raw FreeCAD OCC code: `Part.makeBox()`, `Part.makeCylinder()`, `doc.addObject("Part::Feature")`.
 - ❌ Do NOT use `App.Placement(App.Vector(...), App.Rotation(...))`.
-- ❌ Do NOT generate CadQuery (`cq.Workplane`) or OpenSCAD code.
+- ❌ Do NOT generate CadQuery (`cq.Workplane`).
 - ❌ Do NOT call `Part.show()` — use `shape.show("Name")`.
+
+### 7. Dual Engine: Native OpenSCAD Support
+ScriptCAD also natively runs and transpiles standard OpenSCAD scripts (`.scad`). You may generate either:
+- **ScriptCAD Python** (fluent Pythonic API below, recommended), OR
+- **Standard OpenSCAD** (`difference() { cube([w,d,h], center=true); ... }`).
+ScriptCAD automatically detects OpenSCAD scripts and executes or converts them into watertight FreeCAD solids without requiring external binaries.
 
 ---
 

@@ -69,6 +69,7 @@ ICON_OPEN = get_workbench_icon("ScriptCAD_Open.svg", "document-open.svg")
 ICON_SAVE = get_workbench_icon("ScriptCAD_Save.svg", "document-save.svg")
 ICON_TO_BODY = get_workbench_icon("ScriptCAD_ToBody.svg", "PartDesign_Body.svg")
 ICON_DECOMPILE = get_workbench_icon("ScriptCAD_Decompile.svg", "document-revert.svg", "applications-python.svg")
+ICON_OPENSCAD = get_workbench_icon("ScriptCAD_OpenSCAD.svg", "OpenSCAD_Workbench.svg", "applications-engineering.svg")
 ICON_EXPORT = get_workbench_icon("ScriptCAD_Export.svg", "Std_Export.svg")
 ICON_CLEAR = get_workbench_icon("ScriptCAD_Clear.svg")
 ICON_FIND = get_workbench_icon("ScriptCAD_Find.svg", "edit-find.svg", "zoom-fit-best.svg")
@@ -585,6 +586,14 @@ class ScriptCADEditorDock(QDockWidget):
         self.btn_decompile.clicked.connect(self.decompile_model_to_editor)
         self.toolbar.addWidget(self.btn_decompile)
 
+        # 5. OpenSCAD Transpiler Action
+        self.btn_scad = QToolButton()
+        self.btn_scad.setObjectName("BtnOpenSCAD")
+        self.btn_scad.setIcon(QIcon(ICON_OPENSCAD))
+        self.btn_scad.setToolTip(translate("ScriptCAD", "Convert OpenSCAD script to ScriptCAD Python (Ctrl+Shift+O)"))
+        self.btn_scad.clicked.connect(self.convert_openscad_to_python)
+        self.toolbar.addWidget(self.btn_scad)
+
         self.toolbar.addSeparator()
 
         # 5. Templates & Recipes Dropdown (#5 Preset Geometry Generator)
@@ -775,6 +784,10 @@ class ScriptCADEditorDock(QDockWidget):
         # Decompile shortcut
         self.sc_decompile = QShortcut(QKeySequence("Ctrl+Shift+D"), self)
         self.sc_decompile.activated.connect(self.decompile_model_to_editor)
+
+        # OpenSCAD Convert shortcut
+        self.sc_openscad = QShortcut(QKeySequence("Ctrl+Shift+O"), self)
+        self.sc_openscad.activated.connect(self.convert_openscad_to_python)
 
         # Find shortcut
         self.sc_ctrl_f = QShortcut(QKeySequence("Ctrl+F"), self)
@@ -1040,7 +1053,9 @@ class ScriptCADEditorDock(QDockWidget):
             "05 - Parametric Enclosure with Shelling (.shell)": PRESET_SHELL_ENCLOSURE,
             "06 - Swept Curved Pipe & Flange": PRESET_SWEPT_PIPE,
             "07 - Compression Spring (Helical Coil)": PRESET_SPRING,
-            "08 - 3D Embossed Text Plaque": PRESET_TEXT_PLAQUE
+            "08 - 3D Embossed Text Plaque": PRESET_TEXT_PLAQUE,
+            "09 - OpenSCAD: Parametric Mounting Bracket": PRESET_OPENSCAD_BRACKET,
+            "10 - OpenSCAD: Radial Array Turbine": PRESET_OPENSCAD_TURBINE
         }
         for name in self.presets:
             act = QAction(name, self)
@@ -1174,6 +1189,24 @@ class ScriptCADEditorDock(QDockWidget):
             self.console_output.appendPlainText(f"[ScriptCAD Error] Decompilation failed: {e}\n{tb}")
             self.status_label.setText("Decompilation error.")
 
+    def convert_openscad_to_python(self):
+        """Transpile OpenSCAD script in the editor into idiomatic ScriptCAD Python code."""
+        code = self.editor.toPlainText().strip()
+        if not code:
+            self.status_label.setText("Editor is empty.")
+            return
+
+        try:
+            import scriptcad
+            py_code = scriptcad.transpile_openscad(code)
+            self.editor.setPlainText(py_code)
+            self.is_modified = True
+            self.update_dock_title()
+            self.status_label.setText("✓ Converted OpenSCAD to ScriptCAD Python")
+            self.console_output.appendPlainText("[ScriptCAD] Successfully converted OpenSCAD to ScriptCAD Python script.")
+        except Exception as e:
+            QMessageBox.critical(self, "OpenSCAD Conversion Error", f"Could not convert OpenSCAD script: {e}")
+
     def execute_script(self, is_live: bool = False):
         code = self.editor.toPlainText()
         if not code.strip():
@@ -1211,6 +1244,17 @@ class ScriptCADEditorDock(QDockWidget):
             scope["blendcad"] = scriptcad
         except Exception as e:
             stdout_buf.write(f"[ScriptCAD Warning] Could not pre-import scriptcad: {e}\n")
+
+        # Check if input is OpenSCAD code
+        is_scad = False
+        try:
+            import scriptcad
+            if scriptcad.is_openscad_code(code):
+                is_scad = True
+                stdout_buf.write("[ScriptCAD] OpenSCAD script detected — compiling into ScriptCAD solid...\n")
+                code = scriptcad.transpile_openscad(code)
+        except Exception as e:
+            stdout_buf.write(f"[ScriptCAD OpenSCAD Transpiler Warning] {e}\n")
 
         success = True
         error_msg = ""
@@ -1252,7 +1296,7 @@ class ScriptCADEditorDock(QDockWidget):
                 pass
 
         if success:
-            mode_prefix = "⚡ Live Sync" if is_live else "Run"
+            mode_prefix = "⚡ OpenSCAD Sync" if (is_live and is_scad) else ("OpenSCAD Run" if is_scad else ("⚡ Live Sync" if is_live else "Run"))
             self.status_label.setText(f"<span style='color: #86efac;'>●</span> {mode_prefix} succeeded in {elapsed_ms}ms")
         else:
             self.console_output.appendPlainText(error_msg)
@@ -1413,6 +1457,53 @@ label = Text("ScriptCAD", size=10.0, thickness=2.5, center=True).at(z=3.0)
 # 3. Combine plaque and embossed lettering
 plaque = base + label
 plaque.color(0.2, 0.6, 0.85).show("TextPlaque")
+'''
+
+PRESET_OPENSCAD_BRACKET = '''// ScriptCAD: Native OpenSCAD Parametric Mounting Bracket
+// (Executes directly in ScriptCAD, or press Ctrl+Shift+O to convert to Python!)
+
+width = 60;
+depth = 40;
+thickness = 14;
+hole_r = 2.5;
+
+difference() {
+    // 1. Base solid block
+    cube([width, depth, thickness], center=true);
+
+    // 2. Center bore
+    cylinder(r=10, h=thickness + 4, center=true);
+
+    // 3. 4 Corner mounting holes
+    for (x = [-22, 22]) {
+        for (y = [-13, 13]) {
+            translate([x, y, 0])
+                cylinder(r=hole_r, h=thickness + 2, center=true);
+        }
+    }
+}
+'''
+
+PRESET_OPENSCAD_TURBINE = '''// ScriptCAD: Native OpenSCAD Radial Array Turbine
+// (Executes directly in ScriptCAD, or press Ctrl+Shift+O to convert to Python!)
+
+hub_radius = 12;
+hub_height = 24;
+shaft_bore = 5;
+num_blades = 10;
+
+// Central hub with motor shaft bore
+difference() {
+    cylinder(r=hub_radius, h=hub_height, center=true);
+    cylinder(r=shaft_bore, h=hub_height + 4, center=true);
+}
+
+// Radial turbine blades
+for (i = [0 : num_blades - 1]) {
+    rotate([0, 0, i * (360 / num_blades)])
+        translate([16, 0, 0])
+            cube([18, 2.5, 20], center=true);
+}
 '''
 
 # Backward-compatibility alias

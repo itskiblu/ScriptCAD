@@ -17,3 +17,4 @@ If you are an AI assistant or coding agent asked to generate or modify Python sc
 4. Use method chaining for transforms (`.at(x, y, z)`, `.rotate_z(deg)`, `.fillet(r)`, `.shell(...)`).
 5. Units are millimeters (`mm`) and angles are degrees (`°`).
 6. Do NOT generate raw OpenCASCADE / standard FreeCAD boilerplate (`Part.makeBox`, `App.Placement`, `doc.addObject`).
+7. OpenSCAD scripts (`.scad`) are also natively supported and auto-transpiled into FreeCAD solids.

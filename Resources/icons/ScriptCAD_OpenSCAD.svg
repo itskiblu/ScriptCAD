@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="scadGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fce94f"/>
+      <stop offset="100%" stop-color="#c4a000"/>
+    </linearGradient>
+    <linearGradient id="scadTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#edd400"/>
+      <stop offset="100%" stop-color="#c4a000"/>
+    </linearGradient>
+    <linearGradient id="scadSide" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c4a000"/>
+      <stop offset="100%" stop-color="#8f5902"/>
+    </linearGradient>
+    <linearGradient id="pyBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3465a4"/>
+      <stop offset="100%" stop-color="#204a87"/>
+    </linearGradient>
+  </defs>
+
+  <!-- OpenSCAD Style Isometric Cube -->
+  <!-- Top -->
+  <polygon points="32,6 54,18 32,30 10,18" fill="url(#scadTop)" stroke="#4e3300" stroke-width="1.8" stroke-linejoin="round"/>
+  <!-- Left Side -->
+  <polygon points="10,18 32,30 32,54 10,42" fill="url(#scadGrad)" stroke="#4e3300" stroke-width="1.8" stroke-linejoin="round"/>
+  <!-- Right Side -->
+  <polygon points="32,30 54,18 54,42 32,54" fill="url(#scadSide)" stroke="#4e3300" stroke-width="1.8" stroke-linejoin="round"/>
+
+  <!-- OpenSCAD Text / Code Brackets Overlay -->
+  <circle cx="48" cy="48" r="14" fill="#ffffff" stroke="#204a87" stroke-width="2"/>
+  <text x="48" y="53" font-family="monospace" font-size="14" font-weight="bold" fill="#204a87" text-anchor="middle">&lt;/&gt;</text>
+</svg>
